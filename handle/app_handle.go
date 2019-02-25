@@ -39,5 +39,6 @@ func (app *AppHandler) AccountGenForIM(user_identifier string, appid int) datast
 		log.Error("VerifyUsersig:%v", err.Error())
 		return datastruct.GetDataFailed
 	}
+	log.Debug("userSig:%v", userSig)
 	return datastruct.NULLError
 }

@@ -16,8 +16,8 @@ var appHandler *AppHandler
 
 func CreateAppHandle() *AppHandler {
 	appHandler = new(AppHandler)
-	// appHandler.cacheHandler = cache.CreateCACHEHandler()
-	// appHandler.dbHandler = db.CreateDBHandler()
+	appHandler.cacheHandler = cache.CreateCACHEHandler()
+	appHandler.dbHandler = db.CreateDBHandler()
 	return appHandler
 }
 
@@ -30,7 +30,7 @@ var webHandler *WebHandler
 
 func CreateWebHandle() *WebHandler {
 	webHandler = new(WebHandler)
-	// webHandler.cacheHandler = cache.CreateCACHEHandler()
-	// webHandler.dbHandler = db.CreateDBHandler()
+	webHandler.cacheHandler = cache.CreateCACHEHandler()
+	webHandler.dbHandler = db.CreateDBHandler()
 	return webHandler
 }
