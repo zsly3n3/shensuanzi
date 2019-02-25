@@ -83,15 +83,15 @@ func initData(engine *xorm.Engine) {
 	_, err := engine.Exec(execStr)
 	errhandle(err)
 
-	_, err = engine.Exec("ALTER TABLE user_info CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
-	errhandle(err)
+	// _, err = engine.Exec("ALTER TABLE user_info CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+	// errhandle(err)
 
 	// execStr = fmt.Sprintf("ALTER TABLE user_info AUTO_INCREMENT = %d", datastruct.UserIdStart)
 	// _, err = engine.Exec(execStr)
 	// errhandle(err)
 
-	_, err = engine.Exec("ALTER TABLE user_info CHANGE nick_name nick_name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
-	errhandle(err)
+	// _, err = engine.Exec("ALTER TABLE user_info CHANGE nick_name nick_name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+	// errhandle(err)
 }
 
 func errhandle(err error) {
