@@ -5,7 +5,7 @@ import (
 	"shensuanzi/log"
 )
 
-func (handle *DBHandler) Test(unionId string) datastruct.CodeType {
+func (handle *DBHandler) Test() datastruct.CodeType {
 	engine := handle.mysqlEngine
 	ad := new(datastruct.AdInfo)
 	ad.ImgUrl = "sad"

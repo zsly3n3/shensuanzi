@@ -42,3 +42,7 @@ func (app *AppHandler) AccountGenForIM(user_identifier string, appid int) datast
 	log.Debug("userSig:%v", userSig)
 	return datastruct.NULLError
 }
+
+func (app *AppHandler) Test() datastruct.CodeType {
+	return app.dbHandler.Test()
+}
