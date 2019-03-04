@@ -46,3 +46,7 @@ func (app *AppHandler) AccountGenForIM(user_identifier string, appid int) datast
 func (app *AppHandler) Test() datastruct.CodeType {
 	return app.dbHandler.Test()
 }
+
+func (app *AppHandler) GetTest() (interface{}, datastruct.CodeType) {
+	return app.dbHandler.GetTest()
+}

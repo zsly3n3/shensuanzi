@@ -20,3 +20,10 @@ func (handle *DBHandler) Test() datastruct.CodeType {
 	}
 	return datastruct.NULLError
 }
+
+func (handle *DBHandler) GetTest() (interface{}, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+	ad := new(datastruct.AdInfo)
+	engine.Where("id=1").Get(ad)
+	return ad, datastruct.NULLError
+}
