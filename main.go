@@ -6,11 +6,11 @@ import (
 	// "app/tools"
 
 	"net/http"
-	"shensuanzi/app"
 	"shensuanzi/commondata"
 	"shensuanzi/conf"
 	"shensuanzi/handle"
-	"shensuanzi/web"
+	"shensuanzi/routes/app"
+	"shensuanzi/routes/web"
 
 	"github.com/facebookgo/grace/gracehttp"
 	"github.com/gin-gonic/gin"

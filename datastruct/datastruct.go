@@ -19,9 +19,33 @@ type Platform int //平台
 const (
 	APP Platform = iota
 	H5
+	PC
 )
 
 type PayPlatform int //付费平台
 const (
 	WXPay PayPlatform = iota
+)
+
+type Sex int
+
+const (
+	Female Sex = iota
+	Male
+	Secret //保密
+)
+
+type Calendar int
+
+const (
+	GongLi Calendar = iota //公历
+	Nongli                 //农历
+)
+
+type AccountState int
+
+const (
+	Normal    AccountState = iota //正常
+	BlackList                     //黑名单
+	Freeze                        //冻结
 )

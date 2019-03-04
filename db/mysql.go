@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"shensuanzi/conf"
+	"shensuanzi/datastruct"
 	"shensuanzi/log"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -38,6 +39,11 @@ func CreateDBHandler() *DBHandler {
 func SyncDB(engine *xorm.Engine) {
 	arr := make([]interface{}, 0)
 	var err error
+
+	arr = append(arr, new(datastruct.ColdUserInfo))
+	arr = append(arr, new(datastruct.HotUserInfo))
+	arr = append(arr, new(datastruct.WXUserInfo))
+	arr = append(arr, new(datastruct.AdInfo))
 
 	err = engine.Sync2(arr...)
 	errhandle(err)
