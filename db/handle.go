@@ -16,6 +16,7 @@ func (handle *DBHandler) Test() datastruct.CodeType {
 	_, err := engine.InsertOne(ad)
 	if err != nil {
 		log.Error("Test InsertOne Ad err:%", err.Error())
+		return datastruct.UpdateDataFailed
 	}
 	return datastruct.NULLError
 }
