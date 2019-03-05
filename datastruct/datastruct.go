@@ -49,3 +49,72 @@ const (
 	BlackList                     //黑名单
 	Freeze                        //冻结
 )
+
+type AppraisedType int
+
+const (
+	Char       AppraisedType = iota //只有文字
+	Img                             //只有图片
+	CharAndImg                      //图文
+)
+
+type GoldChangeType int
+
+const (
+	Deposit GoldChangeType = iota //充值
+	Cost                          //消费
+	Refund                        //退款
+)
+
+type DrawCashState int
+
+const (
+	Review  DrawCashState = iota //审核中
+	Succeed                      //提现成功
+	Failed                       //提现失败
+)
+
+type DrawCashArrivalType int //到账类型
+const (
+	ArrivalWX  DrawCashArrivalType = iota //微信钱包
+	ArrivalZFB                            //支付宝
+)
+
+type DrawCashParamsType int //提现参数类型
+const (
+	User DrawCashParamsType = iota //用户
+	FT                             //命理师
+)
+
+type UserOrderRefundType int //退款类型
+const (
+	Apply UserOrderRefundType = iota //用户申请退款
+	Auto                             //系统自动退款
+)
+
+type OrderRightsType int //维权订单类型
+const (
+	NotAgree OrderRightsType = iota //命理师不同意退款
+)
+
+type UserOrderRefundResultType int //退款结果类型
+const (
+	AgreeResult    UserOrderRefundResultType = iota //命理师同意退款
+	NotAgreeResult                                  //命理师不同意退款
+	AutoResult                                      //系统自动退款
+)
+
+type IdAuthState int //身份审核状态
+const (
+	NotYetIdAuth  IdAuthState = iota //未审核
+	IdAuthing                        //审核中
+	IdAuthFailed                     //审核失败
+	IdAuthSucceed                    //审核成功
+)
+
+type ScoreChangeType int //积分变化类型
+
+const (
+	DepositScore ScoreChangeType = iota //充值
+	CostScore                           //消费
+)
