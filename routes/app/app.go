@@ -8,11 +8,11 @@ import (
 )
 
 func isExistFTPhone(r *gin.Engine, handle *handle.AppHandler) {
-	url := "/app/ft/isexist/:phone"
+	url := "/app/ft/isexistphone/:phone"
 	isExistPhone(r, handle, url, true)
 }
 func isExistUserPhone(r *gin.Engine, handle *handle.AppHandler) {
-	url := "/app/user/isexist/:phone"
+	url := "/app/user/isexistphone/:phone"
 	isExistPhone(r, handle, url, false)
 }
 func isExistPhone(r *gin.Engine, handle *handle.AppHandler, url string, isFT bool) {
@@ -39,7 +39,7 @@ func isExistPhone(r *gin.Engine, handle *handle.AppHandler, url string, isFT boo
 }
 
 func isExistFtNickName(r *gin.Engine, handle *handle.AppHandler) {
-	url := "/app/ft/isexist/:nickname"
+	url := "/app/ft/isexistnickname/:nickname"
 	r.GET(url, func(c *gin.Context) {
 		nickname := c.Param("nickname")
 		if nickname == "" {
@@ -65,4 +65,5 @@ func isExistFtNickName(r *gin.Engine, handle *handle.AppHandler) {
 func RegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	isExistFTPhone(r, handle)
 	isExistUserPhone(r, handle)
+	isExistFtNickName(r, handle)
 }
