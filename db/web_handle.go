@@ -22,7 +22,7 @@ func (handle *DBHandler) GetServerInfo() (*datastruct.WebServerInfoBody, datastr
 
 func (handle *DBHandler) EditServerInfo(body *datastruct.WebServerInfoBody) datastruct.CodeType {
 	engine := handle.mysqlEngine
-	serverInfo := new(datastruct.WebServerInfoBody)
+	serverInfo := new(datastruct.ServerInfo)
 	serverInfo.GzhAppid = body.GzhAppid
 	serverInfo.IsMaintain = body.IsMaintain
 	serverInfo.KfptAppid = body.KfptAppid
