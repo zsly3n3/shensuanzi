@@ -38,6 +38,7 @@ func cors() gin.HandlerFunc {
 }
 
 func checkVersion(handle *handle.AppHandler) gin.HandlerFunc {
+
 	return func(c *gin.Context) {
 		serverVersion, isMaintain := handle.GetServerInfoFromMemory()
 		if isMaintain == true {
@@ -54,8 +55,9 @@ func checkVersion(handle *handle.AppHandler) gin.HandlerFunc {
 				"data": handle.GetDirectDownloadApp(),
 			})
 		}
-		//处理请求
-		c.Next()
+		c.Abort()
+		// //处理请求
+		// c.Next()
 	}
 }
 
