@@ -2,6 +2,7 @@ package db
 
 import (
 	"shensuanzi/datastruct"
+	"shensuanzi/log"
 )
 
 func (handle *DBHandler) GetServerInfo() (*datastruct.WebServerInfoBody, datastruct.CodeType) {
@@ -28,6 +29,7 @@ func (handle *DBHandler) EditServerInfo(body *datastruct.WebServerInfoBody) data
 	serverInfo.Version = body.Version
 	_, err := engine.Where("id=?", datastruct.DefaultId).Update(serverInfo)
 	if err != nil {
+		log.Error("EditServerInfo err:%s", err.Error())
 		return datastruct.UpdateDataFailed
 	}
 	return datastruct.NULLError
