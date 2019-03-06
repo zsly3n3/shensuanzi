@@ -1,22 +1,37 @@
 package web
 
 import (
-	"shensuanzi/commondata"
 	"shensuanzi/datastruct"
 	"shensuanzi/handle"
 
 	"github.com/gin-gonic/gin"
 )
 
-func test(r *gin.Engine) {
-	r.GET("/web/test", func(c *gin.Context) {
+func editServerInfo(r *gin.Engine, handle *handle.WebHandler) {
+	r.POST("/web/serverinfo", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"code": datastruct.NULLError,
-			"data": commondata.CommonDataInfo.UniqueId(),
+			"code": handle.EditServerInfo(c),
 		})
 	})
 }
 
+func getServerInfo(r *gin.Engine, handle *handle.WebHandler) {
+	r.GET("/web/serverinfo", func(c *gin.Context) {
+		data, code := handle.GetServerInfo()
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 func RegisterRoutes(r *gin.Engine, handle *handle.WebHandler) {
-	test(r)
+	editServerInfo(r, handle)
+	getServerInfo(r, handle)
 }

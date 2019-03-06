@@ -1,5 +1,7 @@
 package datastruct
 
+const DefaultId = 1
+
 type CodeType int //错误码
 const (
 	NULLError                   CodeType = iota //无错误
@@ -117,4 +119,9 @@ type ScoreChangeType int //积分变化类型
 const (
 	DepositScore ScoreChangeType = iota //充值
 	CostScore                           //消费
+)
+
+type HttpStatusCode int //错误码
+const (
+	Maintenance CodeType = 900 //服务器维护中
 )

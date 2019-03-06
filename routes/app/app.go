@@ -1,23 +1,23 @@
 package app
 
 import (
-	"shensuanzi/datastruct"
 	"shensuanzi/handle"
 
 	"github.com/gin-gonic/gin"
 )
 
-func test(r *gin.Engine, handle *handle.AppHandler) {
-	r.GET("/app/test", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"code": handle.Test(),
-		})
-	})
-}
-
-func getTest(r *gin.Engine, handle *handle.AppHandler) {
-	r.GET("/app/gettest", func(c *gin.Context) {
-		data, code := handle.GetTest()
+/*
+func checkFtPhone(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/checkphone/:phone"
+	r.GET(url, func(c *gin.Context) {
+		phone := c.Param("phone")
+		if phone == "" {
+			c.JSON(200, gin.H{
+				"code": datastruct.ParamError,
+			})
+			return
+		}
+		data, code := handle.checkPhone(phone, true)
 		if code == datastruct.NULLError {
 			c.JSON(200, gin.H{
 				"code": code,
@@ -30,8 +30,8 @@ func getTest(r *gin.Engine, handle *handle.AppHandler) {
 		}
 	})
 }
+*/
 
 func RegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
-	test(r, handle)
-	getTest(r, handle)
+	//checkFtPhone(r, handle)
 }

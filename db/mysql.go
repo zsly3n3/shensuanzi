@@ -14,7 +14,7 @@ type DBHandler struct {
 	mysqlEngine *xorm.Engine
 }
 
-func CreateDBHandler() *DBHandler {
+func CreateDBHandler(isWeb bool) *DBHandler {
 	dbHandler := new(DBHandler)
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4", conf.Server.DB_UserName, conf.Server.DB_Pwd, conf.Server.DB_IP, conf.Server.DB_Name)
 	engine, err := xorm.NewEngine("mysql", dsn)
@@ -25,7 +25,7 @@ func CreateDBHandler() *DBHandler {
 	engine.ShowSQL(true)
 	//设置连接池的空闲数大小
 	maxIdleConns := 40
-	if conf.Common.Mode == conf.Debug {
+	if conf.Common.Mode == conf.Debug || isWeb {
 		maxIdleConns = 5
 	}
 	engine.SetMaxIdleConns(maxIdleConns)

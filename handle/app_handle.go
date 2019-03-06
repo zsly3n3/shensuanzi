@@ -2,6 +2,7 @@ package handle
 
 import (
 	"bytes"
+	"shensuanzi/commondata"
 	"shensuanzi/datastruct"
 	"shensuanzi/log"
 	"shensuanzi/thirdparty/tls-sig-api-golang"
@@ -43,10 +44,13 @@ func (app *AppHandler) AccountGenForIM(user_identifier string, appid int) datast
 	return datastruct.NULLError
 }
 
-func (app *AppHandler) Test() datastruct.CodeType {
-	return app.dbHandler.Test()
+func (app *AppHandler) GetServerInfoFromMemory() (string, bool) {
+	serverInfo := commondata.GetServerInfo()
+	serverInfo.RWMutex.RLock()
+	defer serverInfo.RWMutex.RUnlock()
+	return serverInfo.Version, serverInfo.IsMaintain
 }
 
-func (app *AppHandler) GetTest() (interface{}, datastruct.CodeType) {
-	return app.dbHandler.GetTest()
+func (app *AppHandler) GetDirectDownloadApp() string {
+	return app.dbHandler.GetDirectDownloadApp()
 }

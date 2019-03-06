@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"shensuanzi/commondata"
 	"shensuanzi/conf"
+	"shensuanzi/datastruct"
 	"shensuanzi/handle"
 	"shensuanzi/routes/app"
 	"shensuanzi/routes/web"
@@ -36,14 +37,36 @@ func cors() gin.HandlerFunc {
 	}
 }
 
-func createData() {
-	commondata.Create()
-
+func checkVersion(handle *handle.AppHandler) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		serverVersion, isMaintain := handle.GetServerInfoFromMemory()
+		if isMaintain == true {
+			c.JSON(int(datastruct.Maintenance), gin.H{
+				"code": datastruct.NULLError,
+			})
+			return
+		}
+		version, isExist := c.Request.Header["Appversion"]
+		if isExist && version[0] == serverVersion {
+			//处理请求
+			c.Next()
+		} else {
+			c.JSON(200, gin.H{
+				"code": datastruct.VersionError,
+				"data": handle.GetDirectDownloadApp(),
+			})
+		}
+	}
 }
 
-func registerRoutes(r *gin.Engine) {
+func createData() (*handle.AppHandler, *handle.WebHandler) {
 	app_hanle := handle.CreateAppHandle()
 	web_hanle := handle.CreateWebHandle()
+	commondata.Create(web_hanle.GetWebDBHandler())
+	return app_hanle, web_hanle
+}
+
+func registerRoutes(r *gin.Engine, app_hanle *handle.AppHandler, web_hanle *handle.WebHandler) {
 	app.RegisterRoutes(r, app_hanle)
 	web.RegisterRoutes(r, web_hanle)
 }
@@ -60,8 +83,10 @@ func main() {
 	gin.SetMode(mode)
 	r.Use(cors())
 
-	createData()
-	registerRoutes(r)
+	app_hanle, web_hanle := createData()
+	r.Use(checkVersion(app_hanle))
+
+	registerRoutes(r, app_hanle, web_hanle)
 
 	server := &http.Server{Addr: conf.Server.HttpServer, Handler: r}
 	gracehttp.Serve(server)

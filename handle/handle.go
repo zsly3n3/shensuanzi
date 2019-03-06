@@ -17,20 +17,22 @@ var appHandler *AppHandler
 func CreateAppHandle() *AppHandler {
 	appHandler = new(AppHandler)
 	appHandler.cacheHandler = cache.CreateCACHEHandler()
-	appHandler.dbHandler = db.CreateDBHandler()
+	appHandler.dbHandler = db.CreateDBHandler(false)
 	return appHandler
 }
 
 type WebHandler struct {
-	dbHandler    *db.DBHandler
-	cacheHandler *cache.CACHEHandler
+	dbHandler *db.DBHandler
 }
 
 var webHandler *WebHandler
 
 func CreateWebHandle() *WebHandler {
 	webHandler = new(WebHandler)
-	webHandler.cacheHandler = cache.CreateCACHEHandler()
-	webHandler.dbHandler = db.CreateDBHandler()
+	webHandler.dbHandler = db.CreateDBHandler(true)
 	return webHandler
+}
+
+func (handler *WebHandler) GetWebDBHandler() *db.DBHandler {
+	return handler.dbHandler
 }

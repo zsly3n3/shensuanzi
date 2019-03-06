@@ -304,7 +304,7 @@ type ColdFTInfo struct {
 	IdentityCard  string   `xorm:"CHAR(20) null COMMENT('身份证')"`
 	IdFrontCover  string   `xorm:"VARCHAR(500) null COMMENT('身份证图片正面地址')"`
 	IdBehindCover string   `xorm:"VARCHAR(500) null COMMENT('身份证图片反面地址')"`
-	Introduction  string   `xorm:"VARCHAR(500) null COMMENT('个人介绍')"`
+	Introduction  string   `xorm:"VARCHAR(600) null COMMENT('个人介绍')"`
 	Registration  Platform `xorm:"TINYINT(1) not null COMMENT('注册平台')"`
 	CreatedAt     int64    `xorm:"bigint not null COMMENT('注册时间')"`
 }
@@ -451,6 +451,6 @@ type ServerInfo struct {
 	Id         int    `xorm:"not null pk INT(2) COMMENT('编号')"`
 	Version    string `xorm:"CHAR(10) not null COMMENT('版本号')"`
 	IsMaintain bool   `xorm:"TINYINT(1) not null COMMENT('是否维护')"`
-	GzhAppid   string `xorm:"CHAR(50) not null COMMENT('公众号Appid')"`
-	KfptAppid  string `xorm:"CHAR(50) not null COMMENT('开发平台Appid')"`
+	GzhAppid   string `xorm:"CHAR(50) null COMMENT('公众号Appid')"`
+	KfptAppid  string `xorm:"CHAR(50) null COMMENT('开发平台Appid')"`
 }
