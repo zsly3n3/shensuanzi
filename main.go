@@ -42,7 +42,8 @@ func checkVersion(handle *handle.AppHandler) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		serverVersion, isMaintain := handle.GetServerInfoFromMemory()
 		if isMaintain == true {
-			c.AbortWithStatus(int(datastruct.Maintenance))
+			c.AbortWithStatusJSON(int(datastruct.VersionError), handle.GetDirectDownloadApp())
+			//c.AbortWithStatus(int(datastruct.Maintenance))
 			return
 		}
 		version, isExist := c.Request.Header["Appversion"]
