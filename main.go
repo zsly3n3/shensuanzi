@@ -38,12 +38,15 @@ func cors() gin.HandlerFunc {
 }
 
 func checkVersion(handle *handle.AppHandler) gin.HandlerFunc {
-
 	return func(c *gin.Context) {
+		url := "/web/serverinfo"
+		if c.Request.Method == "POST" && c.Request.RequestURI == url {
+			c.Next()
+			return
+		}
 		serverVersion, isMaintain := handle.GetServerInfoFromMemory()
 		if isMaintain == true {
-			c.AbortWithStatusJSON(int(datastruct.VersionError), handle.GetDirectDownloadApp())
-			//c.AbortWithStatus(int(datastruct.Maintenance))
+			c.AbortWithStatus(int(datastruct.Maintenance))
 			return
 		}
 		version, isExist := c.Request.Header["Appversion"]
