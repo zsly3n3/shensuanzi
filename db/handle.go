@@ -14,3 +14,23 @@ func (handle *DBHandler) GetDirectDownloadApp() string {
 	}
 	return string(results[0][column_name][:])
 }
+
+func (handle *DBHandler) CheckPhone(phone string, isFT bool) (interface{}, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+	var sql string
+	if isFT {
+		sql = "select 1 from cold_f_t_info where phone = ? limit 1"
+	} else {
+		sql = "select 1 from cold_user_info where phone = ? limit 1"
+	}
+	results, err := engine.Query(sql, phone)
+	if err != nil {
+		return nil, datastruct.GetDataFailed
+	}
+	count := len(results)
+	isExist := false
+	if count > 0 {
+		isExist = true
+	}
+	return isExist, datastruct.NULLError
+}

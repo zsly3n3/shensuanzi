@@ -54,3 +54,7 @@ func (app *AppHandler) GetServerInfoFromMemory() (string, bool) {
 func (app *AppHandler) GetDirectDownloadApp() string {
 	return app.dbHandler.GetDirectDownloadApp()
 }
+
+func (app *AppHandler) CheckPhone(phone string, isFT bool) (interface{}, datastruct.CodeType) {
+	return app.dbHandler.CheckPhone(phone, isFT)
+}
