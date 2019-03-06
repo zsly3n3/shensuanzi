@@ -45,19 +45,18 @@ func checkVersion(handle *handle.AppHandler) gin.HandlerFunc {
 			c.JSON(int(datastruct.Maintenance), gin.H{
 				"code": datastruct.NULLError,
 			})
-			return
+			c.Abort()
 		}
 		version, isExist := c.Request.Header["Appversion"]
 		if isExist && version[0] == serverVersion {
+			c.Next()
 		} else {
 			c.JSON(200, gin.H{
 				"code": datastruct.VersionError,
 				"data": handle.GetDirectDownloadApp(),
 			})
+			c.Abort()
 		}
-		c.Abort()
-		// //处理请求
-		// c.Next()
 	}
 }
 
