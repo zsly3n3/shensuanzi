@@ -43,6 +43,7 @@ func SyncDB(engine *xorm.Engine) {
 	arr = append(arr, new(datastruct.ColdUserInfo))
 	arr = append(arr, new(datastruct.HotUserInfo))
 	arr = append(arr, new(datastruct.WXUserInfo))
+	arr = append(arr, new(datastruct.WXFTInfo))
 	arr = append(arr, new(datastruct.AdInfo))
 	arr = append(arr, new(datastruct.ImgNav))
 	arr = append(arr, new(datastruct.AppraisedInfo))

@@ -3,7 +3,7 @@ package datastruct
 /*用户信息冷数据*/
 type ColdUserInfo struct {
 	Id           int64    `xorm:"not null pk autoincr bigint COMMENT('自增编号')"`
-	Phone        string   `xorm:"VARCHAR(20) not null COMMENT('手机号')"`
+	Phone        string   `xorm:"VARCHAR(20) not null unique COMMENT('手机号')"`
 	Pwd          string   `xorm:"VARCHAR(30) null COMMENT('密码')"`
 	NickName     string   `xorm:"VARCHAR(100) null COMMENT('昵称')"`
 	Avatar       string   `xorm:"VARCHAR(500) null COMMENT('头像')"`
@@ -33,7 +33,18 @@ type HotUserInfo struct {
 
 /*微信用户信息*/
 type WXUserInfo struct {
-	Id               int64  `xorm:"bigint not null pk COMMENT('用户Id')"`
+	UserId           int64  `xorm:"bigint not null pk COMMENT('用户Id')"`
+	UUID             string `xorm:"CHAR(50) not null COMMENT('微信UUID')"`
+	PayOpenidForGzh  string `xorm:"CHAR(50) null COMMENT('微信公众号OpenId')"`
+	PayOpenidForKfpt string `xorm:"CHAR(50) null COMMENT('微信开放平台OpenId')"`
+	PayeeOpenid      string `xorm:"CHAR(50) null COMMENT('提现OpenId')"`
+	GzhAppid         string `xorm:"CHAR(22) not null COMMENT('微信公众号Appid')"`
+	KfptAppid        string `xorm:"CHAR(22) not null COMMENT('微信开放平台Appid')"`
+}
+
+/*微信命理师信息*/
+type WXFTInfo struct {
+	FTId             int    `xorm:"INT(11) not null pk COMMENT('大师Id')"`
 	UUID             string `xorm:"CHAR(50) not null COMMENT('微信UUID')"`
 	PayOpenidForGzh  string `xorm:"CHAR(50) null COMMENT('微信公众号OpenId')"`
 	PayOpenidForKfpt string `xorm:"CHAR(50) null COMMENT('微信开放平台OpenId')"`
@@ -294,19 +305,20 @@ type FTOrderRefundMsg struct {
 
 /*命理师信息冷数据*/
 type ColdFTInfo struct {
-	Id            int      `xorm:"not null pk autoincr INT(11) COMMENT('自增编号')"`
-	Phone         string   `xorm:"VARCHAR(20) not null COMMENT('手机号')"`
-	Pwd           string   `xorm:"VARCHAR(30) null COMMENT('密码')"`
-	NickName      string   `xorm:"VARCHAR(100) null COMMENT('昵称')"`
-	Avatar        string   `xorm:"VARCHAR(500) null COMMENT('头像')"`
-	Sex           Sex      `xorm:"TINYINT(1) null COMMENT('性别')"`
-	ActualName    string   `xorm:"VARCHAR(100) null COMMENT('真实姓名')"`
-	IdentityCard  string   `xorm:"CHAR(20) null COMMENT('身份证')"`
-	IdFrontCover  string   `xorm:"VARCHAR(500) null COMMENT('身份证图片正面地址')"`
-	IdBehindCover string   `xorm:"VARCHAR(500) null COMMENT('身份证图片反面地址')"`
-	Introduction  string   `xorm:"VARCHAR(600) null COMMENT('个人介绍')"`
-	Registration  Platform `xorm:"TINYINT(1) not null COMMENT('注册平台')"`
-	CreatedAt     int64    `xorm:"bigint not null COMMENT('注册时间')"`
+	Id            int       `xorm:"not null pk autoincr INT(11) COMMENT('自增编号')"`
+	Phone         string    `xorm:"VARCHAR(20) not null unique COMMENT('手机号')"`
+	Pwd           string    `xorm:"VARCHAR(30) null COMMENT('密码')"`
+	NickName      string    `xorm:"VARCHAR(100) null unique COMMENT('昵称')"`
+	Avatar        string    `xorm:"VARCHAR(500) null COMMENT('头像')"`
+	Sex           Sex       `xorm:"TINYINT(1) null COMMENT('性别')"`
+	ActualName    string    `xorm:"VARCHAR(100) null COMMENT('真实姓名')"`
+	IdentityCard  string    `xorm:"CHAR(20) null COMMENT('身份证')"`
+	IdFrontCover  string    `xorm:"VARCHAR(500) null COMMENT('身份证图片正面地址')"`
+	IdBehindCover string    `xorm:"VARCHAR(500) null COMMENT('身份证图片反面地址')"`
+	Introduction  string    `xorm:"VARCHAR(600) null COMMENT('个人介绍')"`
+	Registration  Platform  `xorm:"TINYINT(1) not null COMMENT('注册平台')"`
+	AuthState     AuthState `xorm:"TINYINT(1) not null COMMENT('0审核中,1审核失败,2审核成功')"`
+	CreatedAt     int64     `xorm:"bigint not null COMMENT('注册时间')"`
 }
 
 /*命理师信息热数据*/
@@ -367,10 +379,10 @@ type ProductInfo struct {
 
 /*命理师认证*/
 type Authentication struct {
-	FTId   int         `xorm:"not null pk INT(11) COMMENT('命理师Id')"`
-	IdAuth IdAuthState `xorm:"TINYINT(1) not null COMMENT('0未审核,1审核中,2审核失败,3审核成功')"`
-	IsCP   bool        `xorm:"TINYINT(1) not null COMMENT('是否消费保障')"`
-	IsHR   bool        `xorm:"TINYINT(1) not null COMMENT('是否金牌推荐')"`
+	FTId     int  `xorm:"not null pk INT(11) COMMENT('命理师Id')"`
+	IsIdCard bool `xorm:"TINYINT(1) not null COMMENT('是否身份证认证')"`
+	IsCP     bool `xorm:"TINYINT(1) not null COMMENT('是否消费保障')"`
+	IsHR     bool `xorm:"TINYINT(1) not null COMMENT('是否金牌推荐')"`
 }
 
 /*命理师缴纳消费保障记录*/

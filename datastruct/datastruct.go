@@ -14,6 +14,7 @@ const (
 	JsonParseFailedFromPutBody                  //来自put请求中的Body解析json失败
 	WXCodeInvalid                               //无效的微信code
 	PlatformInvalid                             //无效的平台参数
+	NickNamePhoneIsUsed                         //昵称或手机号已被使用
 )
 
 type Platform int //平台
@@ -105,12 +106,11 @@ const (
 	AutoResult                                      //系统自动退款
 )
 
-type IdAuthState int //身份审核状态
+type AuthState int //身份审核状态
 const (
-	NotYetIdAuth  IdAuthState = iota //未审核
-	IdAuthing                        //审核中
-	IdAuthFailed                     //审核失败
-	IdAuthSucceed                    //审核成功
+	Authing     AuthState = iota //审核中
+	AuthFailed                   //审核失败
+	AuthSucceed                  //审核成功
 )
 
 type ScoreChangeType int //积分变化类型

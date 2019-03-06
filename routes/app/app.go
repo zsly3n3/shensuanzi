@@ -81,9 +81,29 @@ func getFtMarkInfo(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func ftRegister(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/register"
+	r.POST(url, func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"code": handle.FtRegister(c),
+		})
+	})
+}
+
+func ftRegisterWithID(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/registerwithid"
+	r.POST(url, func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"code": handle.FtRegisterWithID(c),
+		})
+	})
+}
+
 func RegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	isExistFtPhone(r, handle)
 	isExistUserPhone(r, handle)
 	isExistFtNickName(r, handle)
 	getFtMarkInfo(r, handle)
+	ftRegister(r, handle)
+	ftRegisterWithID(r, handle)
 }

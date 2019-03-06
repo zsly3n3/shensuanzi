@@ -1,7 +1,12 @@
 package db
 
 import (
+	"fmt"
 	"shensuanzi/datastruct"
+	"shensuanzi/log"
+	"time"
+
+	"github.com/go-xorm/xorm"
 )
 
 func (handle *DBHandler) GetDirectDownloadApp() string {
@@ -61,4 +66,73 @@ func (handle *DBHandler) GetFtMarkInfo() (interface{}, datastruct.CodeType) {
 		arr = append(arr, string(v["desc"][:]))
 	}
 	return arr, datastruct.NULLError
+}
+
+func (handle *DBHandler) FtRegister(body *datastruct.FTRegisterBody) datastruct.CodeType {
+	return ftRegister(handle.mysqlEngine, body, nil)
+}
+
+func (handle *DBHandler) FtRegisterWithID(body *datastruct.FTRegisterWithIDBody) datastruct.CodeType {
+	return ftRegister(handle.mysqlEngine, &body.FTRegisterBody, body)
+}
+
+func ftRegister(engine *xorm.Engine, body *datastruct.FTRegisterBody, IDbody *datastruct.FTRegisterWithIDBody) datastruct.CodeType {
+	nowTime := time.Now().Unix()
+	cold_ft := new(datastruct.ColdFTInfo)
+	cold_ft.CreatedAt = nowTime
+	cold_ft.Introduction = body.Desc
+	cold_ft.NickName = body.NickName
+	cold_ft.Phone = body.Phone
+	cold_ft.Pwd = body.Pwd
+	cold_ft.Avatar = body.Avatar
+	cold_ft.Registration = body.Platform
+	cold_ft.AuthState = datastruct.Authing
+
+	if IDbody != nil {
+		cold_ft.IdentityCard = IDbody.Identity
+		cold_ft.IdFrontCover = IDbody.IdFrontCover
+		cold_ft.IdBehindCover = IDbody.IdBehindCover
+		cold_ft.ActualName = IDbody.ActualName
+	}
+
+	session := engine.NewSession()
+	defer session.Close()
+	session.Begin()
+
+	_, err := session.InsertOne(cold_ft)
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->FtRegister insert ColdFTInfo :%s", err.Error())
+		rollbackError(str, session)
+		return datastruct.NickNamePhoneIsUsed
+	}
+
+	hot_ft := new(datastruct.HotFTInfo)
+	hot_ft.Id = cold_ft.Id
+	hot_ft.Mark = body.Mark
+
+	auth := new(datastruct.Authentication)
+	auth.FTId = cold_ft.Id
+	auth.IsIdCard = false
+	auth.IsCP = false
+	auth.IsHR = false
+
+	_, err = session.Insert(hot_ft, auth)
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->FtRegister insert HotFTInfo and Authentication :%s", err.Error())
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+
+	err = session.Commit()
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->FtRegister Commit :%s", err.Error())
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+	return datastruct.NULLError
+}
+
+func rollbackError(err_str string, session *xorm.Session) {
+	log.Error("will rollback,err_str:%v", err_str)
+	session.Rollback()
 }
