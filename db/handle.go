@@ -49,3 +49,16 @@ func (handle *DBHandler) IsExistNickName(nickname string) (interface{}, datastru
 	}
 	return isExist, datastruct.NULLError
 }
+func (handle *DBHandler) GetFtMarkInfo(nickname string) (interface{}, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+	sql := "select ftm.desc from f_t_mark_info ftm order by id desc"
+	results, err := engine.Query(sql)
+	if err != nil {
+		return nil, datastruct.GetDataFailed
+	}
+	arr := make([]string, 0, len(results))
+	for _, v := range results {
+		arr = append(arr, string(v["desc"][:]))
+	}
+	return arr, datastruct.NULLError
+}

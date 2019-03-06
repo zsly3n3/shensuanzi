@@ -62,3 +62,7 @@ func (app *AppHandler) IsExistPhone(phone string, isFT bool) (interface{}, datas
 func (app *AppHandler) IsExistNickName(nickname string) (interface{}, datastruct.CodeType) {
 	return app.dbHandler.IsExistNickName(nickname)
 }
+
+func (app *AppHandler) GetFtMarkInfo() (interface{}, datastruct.CodeType) {
+	return app.dbHandler.GetFtMarkInfo()
+}
