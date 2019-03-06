@@ -123,5 +123,5 @@ const (
 type HttpStatusCode int //错误码
 const (
 	Maintenance  CodeType = 900 //服务器维护中
-	VersionError                //客户端与服务器版本不一致
+	VersionError          = 901 //客户端与服务器版本不一致
 )
