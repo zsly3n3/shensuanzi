@@ -46,6 +46,7 @@ func checkVersion(handle *handle.AppHandler) gin.HandlerFunc {
 				"code": datastruct.NULLError,
 			})
 			c.Abort()
+			return
 		}
 		version, isExist := c.Request.Header["Appversion"]
 		if isExist && version[0] == serverVersion {
