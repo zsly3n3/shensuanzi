@@ -22,13 +22,13 @@ func (handle *DBHandler) GetServerInfo() (*datastruct.WebServerInfoBody, datastr
 
 func (handle *DBHandler) EditServerInfo(body *datastruct.WebServerInfoBody) datastruct.CodeType {
 	engine := handle.mysqlEngine
-	log.Debug("body.IsMaintain:%v", body.IsMaintain)
 	serverInfo := new(datastruct.ServerInfo)
 	serverInfo.GzhAppid = body.GzhAppid
 	serverInfo.IsMaintain = body.IsMaintain
 	serverInfo.KfptAppid = body.KfptAppid
 	serverInfo.Version = body.Version
-	_, err := engine.Where("id=?", datastruct.DefaultId).Update(serverInfo)
+
+	_, err := engine.Where("id=?", datastruct.DefaultId).Cols("version", "is_maintain", "gzh_appid", "kfpt_appid").Update(serverInfo)
 	if err != nil {
 		log.Error("EditServerInfo err:%s", err.Error())
 		return datastruct.UpdateDataFailed
