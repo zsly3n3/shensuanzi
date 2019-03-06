@@ -55,6 +55,10 @@ func (app *AppHandler) GetDirectDownloadApp() string {
 	return app.dbHandler.GetDirectDownloadApp()
 }
 
-func (app *AppHandler) CheckPhone(phone string, isFT bool) (interface{}, datastruct.CodeType) {
-	return app.dbHandler.CheckPhone(phone, isFT)
+func (app *AppHandler) IsExistPhone(phone string, isFT bool) (interface{}, datastruct.CodeType) {
+	return app.dbHandler.IsExistPhone(phone, isFT)
+}
+
+func (app *AppHandler) IsExistNickName(nickname string) (interface{}, datastruct.CodeType) {
+	return app.dbHandler.IsExistNickName(nickname)
 }
