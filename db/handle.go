@@ -2,8 +2,11 @@ package db
 
 import (
 	"fmt"
+	"shensuanzi/commondata"
 	"shensuanzi/datastruct"
+	"shensuanzi/datastruct/important"
 	"shensuanzi/log"
+	"shensuanzi/tools"
 	"time"
 
 	"github.com/go-xorm/xorm"
@@ -107,7 +110,7 @@ func ftRegister(engine *xorm.Engine, body *datastruct.FTRegisterBody, IDbody *da
 	}
 
 	hot_ft := new(datastruct.HotFTInfo)
-	hot_ft.Id = cold_ft.Id
+	hot_ft.FTId = cold_ft.Id
 	hot_ft.Mark = body.Mark
 
 	auth := new(datastruct.Authentication)
@@ -135,4 +138,46 @@ func ftRegister(engine *xorm.Engine, body *datastruct.FTRegisterBody, IDbody *da
 func rollbackError(err_str string, session *xorm.Session) {
 	log.Error("will rollback,err_str:%v", err_str)
 	session.Rollback()
+}
+func (handle *DBHandler) FtLogin(body *datastruct.FtLoginBody) datastruct.CodeType {
+	engine := handle.mysqlEngine
+	cold_ft := new(datastruct.ColdFTInfo)
+	has, err := engine.Where("phone=?", body.Phone).Get(cold_ft)
+	if err != nil {
+		log.Error("FtLogin get err:%s", err.Error())
+		return datastruct.GetDataFailed
+	}
+	if !has {
+		return datastruct.NotRegisterPhone
+	}
+	if cold_ft.Pwd != body.Pwd {
+		return datastruct.PwdError
+	}
+	var code datastruct.CodeType
+	switch cold_ft.AuthState {
+	case datastruct.Authing:
+		code = datastruct.AuthingCode
+	case datastruct.AuthFailed:
+		code = datastruct.AuthFailedCode
+	default:
+		code = ftLoginSucceed(cold_ft.Id, engine)
+	}
+	return code
+}
+
+func ftLoginSucceed(ft_id int, enging *xorm.Engine) datastruct.CodeType {
+	token := commondata.UniqueId()
+	nowTime := time.Now().Unix()
+	im_id := fmt.Sprintf("ft_%d", ft_id)
+	im_privatekey, code := tools.AccountGenForIM(im_id, important.IM_SDK_APPID)
+	if code != datastruct.NULLError {
+		return code
+	}
+	sql := "update hot_f_t_info set token = ?,login_time = ?,i_m_private_key = ? where f_t_id=?"
+	_, err := enging.Exec(sql, token, nowTime, im_privatekey, ft_id)
+	if err != nil {
+		log.Error("ftLoginSucceed err:%s", err.Error())
+		return datastruct.UpdateDataFailed
+	}
+	return datastruct.NULLError
 }

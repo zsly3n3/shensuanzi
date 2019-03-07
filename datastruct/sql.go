@@ -18,7 +18,7 @@ type ColdUserInfo struct {
 
 /*用户信息热数据*/
 type HotUserInfo struct {
-	Id            int64        `xorm:"bigint not null pk COMMENT('用户Id')"`
+	UserId        int64        `xorm:"bigint not null pk COMMENT('用户Id')"`
 	Token         string       `xorm:"CHAR(40) not null COMMENT('令牌值')"`
 	LoginTime     int64        `xorm:"bigint not null COMMENT('登录时间')"`
 	GoldCount     int64        `xorm:"bigint not null default 0 COMMENT('当前金币数')"`
@@ -323,7 +323,7 @@ type ColdFTInfo struct {
 
 /*命理师信息热数据*/
 type HotFTInfo struct {
-	Id           int          `xorm:"INT(11) not null pk COMMENT('命理师Id')"`
+	FTId         int          `xorm:"INT(11) not null pk COMMENT('命理师Id')"`
 	Token        string       `xorm:"CHAR(40) not null COMMENT('令牌值')"`
 	LoginTime    int64        `xorm:"bigint not null COMMENT('登录时间')"`
 	Account      int64        `xorm:"bigint not null default 0 COMMENT('当前积分')"`

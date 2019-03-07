@@ -1,5 +1,13 @@
 package datastruct
 
+import "sync"
+
+type ServerData struct {
+	RWMutex    *sync.RWMutex //读写互斥量
+	Version    string        //当前服务端版本号
+	IsMaintain bool          //是否维护
+}
+
 const DefaultId = 1
 
 type CodeType int //错误码
@@ -15,6 +23,10 @@ const (
 	WXCodeInvalid                               //无效的微信code
 	PlatformInvalid                             //无效的平台参数
 	NickNamePhoneIsUsed                         //昵称或手机号已被使用
+	NotRegisterPhone                            //手机号未注册
+	PwdError                                    //密码错误
+	AuthingCode                                 //账号审核中
+	AuthFailedCode                              //账号审核失败
 )
 
 type Platform int //平台
@@ -106,7 +118,7 @@ const (
 	AutoResult                                      //系统自动退款
 )
 
-type AuthState int //身份审核状态
+type AuthState int //账号审核状态
 const (
 	Authing     AuthState = iota //审核中
 	AuthFailed                   //审核失败

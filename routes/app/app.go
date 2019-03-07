@@ -99,6 +99,15 @@ func ftRegisterWithID(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func ftLogin(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/login"
+	r.POST(url, func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"code": handle.FtLogin(c),
+		})
+	})
+}
+
 func RegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	isExistFtPhone(r, handle)
 	isExistUserPhone(r, handle)
@@ -106,4 +115,5 @@ func RegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	getFtMarkInfo(r, handle)
 	ftRegister(r, handle)
 	ftRegisterWithID(r, handle)
+	ftLogin(r, handle)
 }

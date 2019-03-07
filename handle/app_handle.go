@@ -42,8 +42,16 @@ func (app *AppHandler) FtRegister(c *gin.Context) datastruct.CodeType {
 func (app *AppHandler) FtRegisterWithID(c *gin.Context) datastruct.CodeType {
 	var body datastruct.FTRegisterWithIDBody
 	err := c.BindJSON(&body)
-	if err != nil || body.Phone == "" || body.Pwd == "" || body.NickName == "" || body.Avatar == "" || body.Mark == "" || len(body.Desc) < 5 || body.ActualName == "" || body.Identity == "" ||body.IdFrontCover == "" || body.IdBehindCover == "" {
+	if err != nil || body.Phone == "" || body.Pwd == "" || body.NickName == "" || body.Avatar == "" || body.Mark == "" || len(body.Desc) < 5 || body.ActualName == "" || body.Identity == "" || body.IdFrontCover == "" || body.IdBehindCover == "" {
 		return datastruct.ParamError
 	}
 	return app.dbHandler.FtRegisterWithID(&body)
+}
+func (app *AppHandler) FtLogin(c *gin.Context) datastruct.CodeType {
+	var body datastruct.FtLoginBody
+	err := c.BindJSON(&body)
+	if err != nil || body.Phone == "" || body.Pwd == "" {
+		return datastruct.ParamError
+	}
+	return app.dbHandler.FtLogin(&body)
 }

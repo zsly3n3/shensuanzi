@@ -17,3 +17,8 @@ type FTRegisterWithIDBody struct {
 	IdFrontCover  string `json:"front"`
 	IdBehindCover string `json:"behind"`
 }
+
+type FtLoginBody struct {
+	Phone string `json:"phone"`
+	Pwd   string `json:"pwd"`
+}

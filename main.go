@@ -61,7 +61,9 @@ func checkVersion(handle *handle.AppHandler) gin.HandlerFunc {
 func createData() (*handle.AppHandler, *handle.WebHandler) {
 	app_hanle := handle.CreateAppHandle()
 	web_hanle := handle.CreateWebHandle()
-	commondata.Create(web_hanle.GetWebDBHandler())
+	commondata.Create()
+	serverInfo := handle.CreateServerInfo(web_hanle.GetWebDBHandler())
+	commondata.SetServerInfo(serverInfo)
 	return app_hanle, web_hanle
 }
 
