@@ -47,11 +47,96 @@ func (app *AppHandler) FtRegisterWithID(c *gin.Context) datastruct.CodeType {
 	}
 	return app.dbHandler.FtRegisterWithID(&body)
 }
-func (app *AppHandler) FtLogin(c *gin.Context) datastruct.CodeType {
+func (app *AppHandler) FtLogin(c *gin.Context) (interface{}, datastruct.CodeType) {
 	var body datastruct.FtLoginBody
 	err := c.BindJSON(&body)
 	if err != nil || body.Phone == "" || body.Pwd == "" {
+		return nil, datastruct.ParamError
+	}
+	rs, code := app.dbHandler.FtLogin(&body)
+	if code != datastruct.NULLError {
+		return nil, code
+	}
+	ft_redis := new(datastruct.FtRedisData)
+	ft_redis.FtId = rs.FtInfo.Id
+	ft_redis.Token = rs.Token
+	ft_redis.AccountState = rs.FtInfo.AccountState
+	conn := app.cacheHandler.GetConn()
+	defer conn.Close()
+	app.cacheHandler.SetFtToken(conn, ft_redis)
+	app.cacheHandler.AddExpire(conn, ft_redis.Token)
+	return rs, code
+}
+
+func (app *AppHandler) UpdateFtInfo(c *gin.Context, ft_id int) datastruct.CodeType {
+	var body datastruct.UpdateFtInfoBody
+	err := c.BindJSON(&body)
+	if err != nil || body.Avatar == "" || body.NickName == "" {
 		return datastruct.ParamError
 	}
-	return app.dbHandler.FtLogin(&body)
+	return app.dbHandler.UpdateFtInfo(&body, ft_id)
 }
+
+func (app *AppHandler) UpdateFtMark(c *gin.Context, ft_id int) datastruct.CodeType {
+	var body datastruct.UpdateFtMarkBody
+	err := c.BindJSON(&body)
+	if err != nil || body.Mark == "" {
+		return datastruct.ParamError
+	}
+	return app.dbHandler.UpdateFtMark(&body, ft_id)
+}
+
+func (app *AppHandler) GetFtInfo(ft_id int) (interface{}, datastruct.CodeType) {
+	return app.dbHandler.GetFtInfo(ft_id)
+}
+
+func (app *AppHandler) IsExistFt(token string) (int, bool, bool) {
+	conn := app.cacheHandler.GetConn()
+	defer conn.Close()
+	var ft_id int
+	var tf bool
+	var isBlackList bool
+	ft_id, tf, isBlackList = app.cacheHandler.IsExistFtWithConn(conn, token)
+	if !tf {
+		var ft_data *datastruct.FtRedisData
+		ft_data, tf = app.dbHandler.GetFtDataWithToken(token)
+		if tf {
+			if ft_data.AccountState == datastruct.BlackList {
+				isBlackList = true
+			}
+			app.cacheHandler.SetFtToken(conn, ft_data)
+			app.cacheHandler.AddExpire(conn, token)
+		}
+	} else {
+		app.cacheHandler.AddExpire(conn, token)
+	}
+	return ft_id, tf, isBlackList
+}
+
+func (app *AppHandler) IsExistUser(token string) (int64, bool, bool) {
+	conn := app.cacheHandler.GetConn()
+	defer conn.Close()
+	var userId int64
+	var tf bool
+	var isBlackList bool
+	userId, tf, isBlackList = app.cacheHandler.IsExistUserWithConn(conn, token)
+	if !tf {
+		// var user *datastruct.UserInfo
+		// user, tf = handle.dbHandler.GetUserDataWithToken(token)
+		// if tf {
+		// 	userId = user.Id
+		// 	isBlackList = tools.IntToBool(user.IsBlackList)
+		// 	handle.cacheHandler.SetUserAllData(conn, user)
+		// 	handle.cacheHandler.AddExpire(conn, token)
+		// }
+	} else {
+		//app.cacheHandler.AddExpire(conn, token)
+	}
+	return userId, tf, isBlackList
+}
+
+// func (app *AppHandler) FtIsOnline(ft_id int) datastruct.CodeType {
+// 	conn := app.cacheHandler.GetConn()
+// 	defer conn.Close()
+// 	return app.cacheHandler.SetFtOnline(conn, ft_id)
+// }

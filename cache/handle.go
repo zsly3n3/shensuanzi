@@ -1,6 +1,12 @@
 package cache
 
-import "github.com/gomodule/redigo/redis"
+import (
+	"shensuanzi/datastruct"
+	"shensuanzi/log"
+	"shensuanzi/tools"
+
+	"github.com/gomodule/redigo/redis"
+)
 
 func (handle *CACHEHandler) clearData() {
 	conn := handle.GetConn()
@@ -14,40 +20,6 @@ func (handle *CACHEHandler) GetConn() redis.Conn {
 }
 
 /*
-func (handle *CACHEHandler) IsExistUserWithConn(conn redis.Conn, key string) (int, bool, bool) {
-	value, err := redis.Values(conn.Do("hmget", key, datastruct.UserIdField, datastruct.IsBlackListField))
-	length := len(value)
-	if err != nil || length == 0 {
-		return -1, false, false
-	}
-	var userId int
-	var isBlackList int
-	for i := 0; i < length; i++ {
-		x_value := value[i]
-		if x_value == nil {
-			return -1, false, false
-		}
-		tmp := x_value.([]byte)
-		str := string(tmp[:])
-		switch i {
-		case 0:
-			userId = tools.StringToInt(str)
-		case 1:
-			isBlackList = tools.StringToInt(str)
-		}
-	}
-	log.Debug("CACHEHandler IsExistUserWithConn userid:%s", userId)
-	return userId, true, tools.IntToBool(isBlackList)
-}
-
-
-func (handle *CACHEHandler) AddExpire(conn redis.Conn, token string) {
-	_, err := conn.Do("expire", token, datastruct.EXPIRETIME)
-	if err != nil {
-		log.Debug("expire token:%s err:%s", token, err.Error())
-		return
-	}
-}
 
 //创建充值订单
 func (handle *CACHEHandler) CreateOrderForm(pay *datastruct.OrderForm) datastruct.CodeType {
@@ -87,26 +59,6 @@ func (handle *CACHEHandler) GetPayData(payId string) (*datastruct.OrderForm, dat
 }
 
 
-
-func (handle *CACHEHandler) SetUserAllData(conn redis.Conn, u_data *datastruct.UserInfo) {
-	key := u_data.Token
-	//add
-
-	args := make([]interface{}, 0, 5)
-	args = append(args, key)
-
-	args = append(args, datastruct.UserIdField)
-	args = append(args, u_data.Id)
-	args = append(args, datastruct.IsBlackListField)
-	args = append(args, u_data.IsBlackList)
-
-	_, err := conn.Do("hmset", args...)
-
-	if err != nil {
-		log.Debug("CACHEHandler SetPlayerData err:%s", err.Error())
-	}
-}
-
 func (handle *CACHEHandler) UpdateBlackList(token string, isBlackList int) {
 	conn := handle.GetConn()
 	defer conn.Close()
@@ -144,3 +96,110 @@ func (handle *CACHEHandler) GetTmpUsers() []*datastruct.TmpUser {
 }
 
 */
+
+func (handle *CACHEHandler) SetFtToken(conn redis.Conn, data *datastruct.FtRedisData) {
+	key := data.Token
+
+	args := make([]interface{}, 0, 5)
+	args = append(args, key)
+	args = append(args, datastruct.Reidis_IdField)
+	args = append(args, data.FtId)
+	args = append(args, datastruct.Reidis_AccountStateField)
+	args = append(args, int(data.AccountState))
+
+	_, err := conn.Do("hmset", args...)
+	if err != nil {
+		log.Debug("CACHEHandler SetFtToken err:%s", err.Error())
+	}
+}
+
+// const ftOnlineKey = "ft_online"
+
+// func (handle *CACHEHandler) SetFtOnline(conn redis.Conn, ft_id int) datastruct.CodeType {
+// 	args := make([]interface{}, 0)
+// 	args = append(args, ftOnlineKey)
+// 	args = append(args, ft_id)
+// 	args = append(args, "")
+// 	_, err := conn.Do("HSETNX", args...)
+// 	if err != nil {
+// 		log.Error("CACHEHandler SetFtOnline err:%s", err.Error())
+// 		return datastruct.UpdateDataFailed
+// 	}
+// 	return datastruct.NULLError
+// }
+
+// func (handle *CACHEHandler) FtOffline(conn redis.Conn, ft_id_arr []interface{}) {
+// 	args := make([]interface{}, 0)
+// 	args = append(args, ftOnlineKey)
+// 	args = append(args, ft_id_arr...)
+// 	_, err := conn.Do("HDEL", args...)
+// 	if err != nil {
+// 		log.Debug("CACHEHandler FtOffline err:%s", err.Error())
+// 	}
+// }
+
+func (handle *CACHEHandler) AddExpire(conn redis.Conn, token string) {
+	_, err := conn.Do("expire", token, datastruct.RedisExpireTime)
+	if err != nil {
+		log.Debug("expire token:%s err:%s", token, err.Error())
+		return
+	}
+}
+
+func (handle *CACHEHandler) IsExistFtWithConn(conn redis.Conn, key string) (int, bool, bool) {
+	value, err := redis.Values(conn.Do("hmget", key, datastruct.Reidis_IdField, datastruct.Reidis_AccountStateField))
+	length := len(value)
+	if err != nil || length == 0 {
+		return -1, false, false
+	}
+	var id int
+	var accountState int
+	for i := 0; i < length; i++ {
+		x_value := value[i]
+		if x_value == nil {
+			return -1, false, false
+		}
+		tmp := x_value.([]byte)
+		str := string(tmp[:])
+		switch i {
+		case 0:
+			id = tools.StringToInt(str)
+		case 1:
+			accountState = tools.StringToInt(str)
+		}
+	}
+	isBlackList := false
+	if accountState == int(datastruct.BlackList) {
+		isBlackList = true
+	}
+	return id, true, isBlackList
+}
+
+func (handle *CACHEHandler) IsExistUserWithConn(conn redis.Conn, key string) (int64, bool, bool) {
+	value, err := redis.Values(conn.Do("hmget", key, datastruct.Reidis_IdField, datastruct.Reidis_AccountStateField))
+	length := len(value)
+	if err != nil || length == 0 {
+		return -1, false, false
+	}
+	var id int64
+	var accountState int
+	for i := 0; i < length; i++ {
+		x_value := value[i]
+		if x_value == nil {
+			return -1, false, false
+		}
+		tmp := x_value.([]byte)
+		str := string(tmp[:])
+		switch i {
+		case 0:
+			id = tools.StringToInt64(str)
+		case 1:
+			accountState = tools.StringToInt(str)
+		}
+	}
+	isBlackList := false
+	if accountState == int(datastruct.BlackList) {
+		isBlackList = true
+	}
+	return id, true, isBlackList
+}

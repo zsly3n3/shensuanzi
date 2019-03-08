@@ -22,3 +22,12 @@ type FtLoginBody struct {
 	Phone string `json:"phone"`
 	Pwd   string `json:"pwd"`
 }
+
+type UpdateFtInfoBody struct {
+	Avatar   string `json:"avatar"`
+	NickName string `json:"nickname"`
+}
+
+type UpdateFtMarkBody struct {
+	Mark string `json:"mark"`
+}

@@ -9,6 +9,7 @@ import (
 	"shensuanzi/datastruct"
 	"shensuanzi/log"
 	"shensuanzi/thirdparty/tls-sig-api-golang"
+	"strconv"
 	"strings"
 )
 
@@ -72,3 +73,31 @@ func AccountGenForIM(user_identifier string, appid int) (string, datastruct.Code
 
 	return userSig, datastruct.NULLError
 }
+
+func StringToBool(value string) bool {
+	tf := false
+	if value == "1" {
+		tf = true
+	}
+	return tf
+}
+
+func StringToInt(value string) int {
+	rs, _ := strconv.Atoi(value)
+	return rs
+}
+
+func StringToInt64(tmp string) int64 {
+	rs, _ := strconv.ParseInt(tmp, 10, 64)
+	return rs
+}
+
+func StringToIdCardState(value string) datastruct.IdCardState {
+	rs := StringToInt(value)
+	return datastruct.IdCardState(rs)
+}
+
+// func StringToOnlineState(value string) datastruct.FTOnlineState {
+// 	rs := StringToInt(value)
+// 	return datastruct.FTOnlineState(rs)
+// }

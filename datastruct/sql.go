@@ -334,9 +334,11 @@ type HotFTInfo struct {
 	AccountState AccountState `xorm:"TINYINT(1) not null default 0 COMMENT('账户状态,0是正常,1是黑名单,2是冻结')"`
 	Mark         string       `xorm:"VARCHAR(255) null COMMENT('多个标签内容')"`
 	AutoReply    string       `xorm:"VARCHAR(255) null COMMENT('接待语')"`
+	SortId       int          `xorm:"INT(11) not null default 0 COMMENT('指定排序Id')"`
 	OrderScore   float64      `xorm:"decimal(16,2) not null default 0 COMMENT('排序得分')"`
 	IncomePer    float64      `xorm:"decimal(16,2) not null default 60 COMMENT('收益提成百分比,[0,100]')"`
 	IMPrivateKey string       `xorm:"CHAR(255) not null COMMENT('IM私钥')"`
+	EnableFree   bool         `xorm:"TINYINT(1) not null default 1 COMMENT('是否开启免费对话')"`
 }
 
 /*商铺信息*/
@@ -356,13 +358,13 @@ type ShopImgs struct {
 	ImgUrl string `xorm:"VARCHAR(255) not null COMMENT('图片地址')"`
 }
 
-/*大师在线时间段*/
-type FTOnlineTime struct {
-	Id        int    `xorm:"not null pk INT(11) autoincr COMMENT('自增编号')"`
-	FTId      int    `xorm:"not null INT(11) COMMENT('命理师Id')"`
-	StartTime string `xorm:"not null CHAR(8) COMMENT('开始时间段,格式:01:05')"`
-	EndTime   string `xorm:"not null CHAR(8) COMMENT('结束时间段,格式:01:05')"`
-}
+// /*大师在线时间段*/
+// type FTOnlineTime struct {
+// 	Id        int    `xorm:"not null pk INT(11) autoincr COMMENT('自增编号')"`
+// 	FTId      int    `xorm:"not null INT(11) COMMENT('命理师Id')"`
+// 	StartTime string `xorm:"not null CHAR(8) default '00:00' COMMENT('开始时间段,格式:01:05')"`
+// 	EndTime   string `xorm:"not null CHAR(8) default '23:59' COMMENT('结束时间段,格式:01:05')"`
+// }
 
 /*产品信息*/
 type ProductInfo struct {
@@ -379,10 +381,10 @@ type ProductInfo struct {
 
 /*命理师认证*/
 type Authentication struct {
-	FTId     int  `xorm:"not null pk INT(11) COMMENT('命理师Id')"`
-	IsIdCard bool `xorm:"TINYINT(1) not null COMMENT('是否身份证认证')"`
-	IsCP     bool `xorm:"TINYINT(1) not null COMMENT('是否消费保障')"`
-	IsHR     bool `xorm:"TINYINT(1) not null COMMENT('是否金牌推荐')"`
+	FTId        int         `xorm:"not null pk INT(11) COMMENT('命理师Id')"`
+	IdCardState IdCardState `xorm:"TINYINT(1) not null default 0 COMMENT('0是未提交,1是已提交,2是未通过,3是已通过')"`
+	IsCP        bool        `xorm:"TINYINT(1) not null default 0 COMMENT('是否消费保障')"`
+	IsHR        bool        `xorm:"TINYINT(1) not null default 0 COMMENT('是否金牌推荐')"`
 }
 
 /*命理师缴纳消费保障记录*/

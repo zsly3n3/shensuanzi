@@ -10,6 +10,10 @@ type ServerData struct {
 
 const DefaultId = 1
 
+const Reidis_IdField = "Id"
+const Reidis_AccountStateField = "AccountState"
+const RedisExpireTime = 300 //Redis过期时间300秒
+
 type CodeType int //错误码
 const (
 	NULLError                   CodeType = iota //无错误
@@ -27,6 +31,7 @@ const (
 	PwdError                                    //密码错误
 	AuthingCode                                 //账号审核中
 	AuthFailedCode                              //账号审核失败
+	Redirect                                    //重定向
 )
 
 type Platform int //平台
@@ -60,8 +65,8 @@ type AccountState int
 
 const (
 	Normal    AccountState = iota //正常
-	BlackList                     //黑名单
 	Freeze                        //冻结
+	BlackList                     //黑名单
 )
 
 type AppraisedType int
@@ -137,3 +142,31 @@ const (
 	Maintenance  CodeType = 900 //服务器维护中
 	VersionError          = 901 //客户端与服务器版本不一致
 )
+
+// type FTOnlineState int //命理师在线状态
+// const (
+// 	AutoAdjust    FTOnlineState = iota //根据在线时间自动调整状态
+// 	ManualOffline                      //手动设置离线
+// 	ManualBusy                         //手动设置忙碌
+// )
+
+type IdCardState int //审核身份证状态
+const (
+	IdCardNotSubmit IdCardState = iota //未提交
+	IdCardSubmited                     //已提交
+	IdCardNotPass                      //未通过
+	IdCardPassed                       //已通过
+)
+
+type OnlineUIState int //在线UI状态
+const (
+	OnlineUI  OnlineUIState = iota //在线
+	BusyUI                         //忙碌
+	OfflineUI                      //离线
+)
+
+type FtRedisData struct {
+	FtId         int
+	Token        string
+	AccountState AccountState
+}

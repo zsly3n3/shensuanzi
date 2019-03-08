@@ -77,7 +77,7 @@ func SyncDB(engine *xorm.Engine) {
 	arr = append(arr, new(datastruct.HotFTInfo))
 	arr = append(arr, new(datastruct.ShopInfo))
 	arr = append(arr, new(datastruct.ShopImgs))
-	arr = append(arr, new(datastruct.FTOnlineTime))
+	//arr = append(arr, new(datastruct.FTOnlineTime))
 	arr = append(arr, new(datastruct.ProductInfo))
 	arr = append(arr, new(datastruct.Authentication))
 	arr = append(arr, new(datastruct.PayConsumerProtection))
@@ -90,6 +90,8 @@ func SyncDB(engine *xorm.Engine) {
 	arr = append(arr, new(datastruct.DomainInfo))
 	arr = append(arr, new(datastruct.CustomerServiceInfo))
 	arr = append(arr, new(datastruct.ServerInfo))
+
+	engine.DropTables(arr...) //test
 
 	err = engine.Sync2(arr...)
 	errhandle(err)

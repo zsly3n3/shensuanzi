@@ -115,9 +115,16 @@ func ftRegister(engine *xorm.Engine, body *datastruct.FTRegisterBody, IDbody *da
 
 	auth := new(datastruct.Authentication)
 	auth.FTId = cold_ft.Id
-	auth.IsIdCard = false
+	if IDbody != nil {
+		auth.IdCardState = datastruct.IdCardSubmited
+	} else {
+		auth.IdCardState = datastruct.IdCardNotSubmit
+	}
 	auth.IsCP = false
 	auth.IsHR = false
+
+	// online := new(datastruct.FTOnlineTime)
+	// online.FTId = cold_ft.Id
 
 	_, err = session.Insert(hot_ft, auth)
 	if err != nil {
@@ -139,44 +146,131 @@ func rollbackError(err_str string, session *xorm.Session) {
 	log.Error("will rollback,err_str:%v", err_str)
 	session.Rollback()
 }
-func (handle *DBHandler) FtLogin(body *datastruct.FtLoginBody) datastruct.CodeType {
+
+func (handle *DBHandler) FtLogin(body *datastruct.FtLoginBody) (*datastruct.RespFtLogin, datastruct.CodeType) {
 	engine := handle.mysqlEngine
 	cold_ft := new(datastruct.ColdFTInfo)
 	has, err := engine.Where("phone=?", body.Phone).Get(cold_ft)
 	if err != nil {
 		log.Error("FtLogin get err:%s", err.Error())
-		return datastruct.GetDataFailed
+		return nil, datastruct.GetDataFailed
 	}
 	if !has {
-		return datastruct.NotRegisterPhone
+		return nil, datastruct.NotRegisterPhone
 	}
 	if cold_ft.Pwd != body.Pwd {
-		return datastruct.PwdError
+		return nil, datastruct.PwdError
 	}
 	var code datastruct.CodeType
+	var rs *datastruct.RespFtLogin
+	rs = nil
 	switch cold_ft.AuthState {
 	case datastruct.Authing:
 		code = datastruct.AuthingCode
 	case datastruct.AuthFailed:
 		code = datastruct.AuthFailedCode
 	default:
-		code = ftLoginSucceed(cold_ft.Id, engine)
+		rs, code = ftLoginSucceed(cold_ft.Id, engine)
 	}
-	return code
+	return rs, code
 }
 
-func ftLoginSucceed(ft_id int, enging *xorm.Engine) datastruct.CodeType {
+func ftLoginSucceed(ft_id int, enging *xorm.Engine) (*datastruct.RespFtLogin, datastruct.CodeType) {
 	token := commondata.UniqueId()
 	nowTime := time.Now().Unix()
 	im_id := fmt.Sprintf("ft_%d", ft_id)
 	im_privatekey, code := tools.AccountGenForIM(im_id, important.IM_SDK_APPID)
 	if code != datastruct.NULLError {
-		return code
+		return nil, code
 	}
 	sql := "update hot_f_t_info set token = ?,login_time = ?,i_m_private_key = ? where f_t_id=?"
 	_, err := enging.Exec(sql, token, nowTime, im_privatekey, ft_id)
 	if err != nil {
 		log.Error("ftLoginSucceed err:%s", err.Error())
+		return nil, datastruct.UpdateDataFailed
+	}
+	respFtInfo, code := getFtInfo(ft_id, enging)
+	rs := new(datastruct.RespFtLogin)
+	rs.FtInfo = respFtInfo
+	rs.Token = token
+	rs.IMPrivateKey = im_privatekey
+	return rs, code
+}
+
+func (handle *DBHandler) GetFtInfo(ft_id int) (*datastruct.RespFtInfo, datastruct.CodeType) {
+	return getFtInfo(ft_id, handle.mysqlEngine)
+}
+
+func getFtInfo(ft_id int, engine *xorm.Engine) (*datastruct.RespFtInfo, datastruct.CodeType) {
+	sql := "select cold.avatar,cold.nick_name,hot.enable_free,hot.mark,auth.is_c_p,auth.is_h_r,auth.id_card_state from cold_f_t_info cold join hot_f_t_info hot on cold.id = hot.f_t_id join authentication auth on auth.f_t_id = cold.id where id = ?"
+	results, err := engine.Query(sql, ft_id)
+	if err != nil {
+		log.Error("GetFtInfo err0: %s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+	if len(results) <= 0 {
+		log.Error("GetFtInfo err1: len(results) is zero")
+		return nil, datastruct.GetDataFailed
+	}
+	mp := results[0]
+	info := new(datastruct.RespFtInfo)
+	info.Id = ft_id
+	info.Avatar = string(mp["avatar"][:])
+	info.NickName = string(mp["nick_name"][:])
+	info.Mark = string(mp["mark"][:])
+	info.EnableFree = tools.StringToBool(string(mp["enable_free"][:]))
+	authIcon := new(datastruct.AuthIcon)
+	authIcon.IsCP = tools.StringToBool(string(mp["is_c_p"][:]))
+	authIcon.IsHR = tools.StringToBool(string(mp["is_h_r"][:]))
+	idCardState := tools.StringToIdCardState(string(mp["id_card_state"][:]))
+	if idCardState == datastruct.IdCardPassed {
+		authIcon.IdCard = true
+	} else {
+		authIcon.IdCard = false
+	}
+	info.AuthIcon = authIcon
+	return info, datastruct.NULLError
+}
+
+func (handle *DBHandler) GetFtDataWithToken(token string) (*datastruct.FtRedisData, bool) {
+	engine := handle.mysqlEngine
+	sql := "select f_t_id,account_state from hot_f_t_info where token = ?"
+	results, err := engine.Query(sql, token)
+	if err != nil || len(results) <= 0 {
+		return nil, false
+	}
+	redis_data := new(datastruct.FtRedisData)
+	redis_data.Token = token
+
+	mp := results[0]
+	redis_data.FtId = tools.StringToInt(string(mp["f_t_id"][:]))
+	redis_data.AccountState = datastruct.AccountState(tools.StringToInt(string(mp["f_t_id"][:])))
+	sql = "update hot_f_t_info set login_time = ? where token = ?"
+	engine.Exec(sql, time.Now().Unix(), token)
+
+	return redis_data, true
+}
+
+func (handle *DBHandler) UpdateFtInfo(body *datastruct.UpdateFtInfoBody, ft_id int) datastruct.CodeType {
+	engine := handle.mysqlEngine
+	cold_ft := new(datastruct.ColdFTInfo)
+	cold_ft.Avatar = body.Avatar
+	cold_ft.NickName = body.NickName
+	_, err := engine.Where("id=?", ft_id).Cols("nick_name", "avatar").Update(cold_ft)
+	if err != nil {
+		log.Error("DBHandler->UpdateFtInfo err:%s", err.Error())
+		return datastruct.UpdateDataFailed
+	}
+	return datastruct.NULLError
+}
+
+func (handle *DBHandler) UpdateFtMark(body *datastruct.UpdateFtMarkBody, ft_id int) datastruct.CodeType {
+	engine := handle.mysqlEngine
+	hot_ft := new(datastruct.HotFTInfo)
+	hot_ft.Mark = body.Mark
+	_, err := engine.Where("id=?", ft_id).Cols("mark").Update(hot_ft)
+	if err != nil {
+		log.Error("DBHandler->UpdateFtMark err:%s", err.Error())
 		return datastruct.UpdateDataFailed
 	}
 	return datastruct.NULLError

@@ -102,11 +102,137 @@ func ftRegisterWithID(r *gin.Engine, handle *handle.AppHandler) {
 func ftLogin(r *gin.Engine, handle *handle.AppHandler) {
 	url := "/app/ft/login"
 	r.POST(url, func(c *gin.Context) {
+		data, code := handle.FtLogin(c)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
+func ftInfo(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/info"
+	r.GET(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.GetFtInfo(id)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
+func updateFtInfo(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/info"
+	r.POST(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
 		c.JSON(200, gin.H{
-			"code": handle.FtLogin(c),
+			"code": handle.UpdateFtInfo(c, id),
 		})
 	})
 }
+
+func updateFtMark(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/mark"
+	r.POST(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		c.JSON(200, gin.H{
+			"code": handle.UpdateFtMark(c, id),
+		})
+	})
+}
+
+// func ftIsOnline(r *gin.Engine, handle *handle.AppHandler) {
+// 	url := "/app/ft/online"
+// 	r.POST(url, func(c *gin.Context) {
+// 		id, _, tf := checkFtToken(c, handle)
+// 		if !tf {
+// 			return
+// 		}
+// 		c.JSON(200, gin.H{
+// 			"code": handle.FtIsOnline(id),
+// 		})
+// 	})
+// }
+
+func checkFtToken(c *gin.Context, handle *handle.AppHandler) (int, string, bool) {
+	tokens, isExist := c.Request.Header["Apptoken"]
+	tf := false
+	var token string
+	var ft_id int
+	var isBlackList bool
+	if isExist {
+		token = tokens[0]
+		if token != "" {
+			ft_id, tf, isBlackList = handle.IsExistFt(token)
+			if tf && isBlackList {
+				// url := eventHandler.GetBlackListRedirect()
+				url := "http://www.baidu.com"
+				c.JSON(200, gin.H{
+					"code": datastruct.Redirect,
+					"data": url,
+				})
+				return -1, "", false
+			}
+		}
+	}
+	if !tf {
+		c.JSON(200, gin.H{
+			"code": datastruct.TokenError,
+		})
+	}
+	return ft_id, token, tf
+}
+
+// func checkUserToken(c *gin.Context, handle *handle.AppHandler) (int64, string, bool) {
+// 	tokens, isExist := c.Request.Header["Apptoken"]
+// 	tf := false
+// 	var token string
+// 	var userId int64
+// 	var isBlackList bool
+// 	if isExist {
+// 		token = tokens[0]
+// 		if token != "" {
+// 			userId, tf, isBlackList = handle.IsExistUser(token)
+// 			if tf && isBlackList {
+// 				// url := eventHandler.GetBlackListRedirect()
+// 				url := "http://www.baidu.com"
+// 				c.JSON(200, gin.H{
+// 					"code": datastruct.Redirect,
+// 					"data": url,
+// 				})
+// 				return -1, "", false
+// 			}
+// 		}
+// 	}
+// 	if !tf {
+// 		c.JSON(200, gin.H{
+// 			"code": datastruct.TokenError,
+// 		})
+// 	}
+// 	return userId, token, tf
+// }
 
 func RegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	isExistFtPhone(r, handle)
@@ -116,4 +242,8 @@ func RegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	ftRegister(r, handle)
 	ftRegisterWithID(r, handle)
 	ftLogin(r, handle)
+	ftInfo(r, handle)
+	updateFtInfo(r, handle)
+	updateFtMark(r, handle)
+	// ftIsOnline(r, handle)
 }
