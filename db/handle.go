@@ -123,10 +123,11 @@ func ftRegister(engine *xorm.Engine, body *datastruct.FTRegisterBody, IDbody *da
 	auth.IsCP = false
 	auth.IsHR = false
 
-	// online := new(datastruct.FTOnlineTime)
-	// online.FTId = cold_ft.Id
+	//create shop
+	shop := new(datastruct.ShopInfo)
+	shop.FTId = cold_ft.Id
 
-	_, err = session.Insert(hot_ft, auth)
+	_, err = session.Insert(hot_ft, auth, shop)
 	if err != nil {
 		str := fmt.Sprintf("DBHandler->FtRegister insert HotFTInfo and Authentication :%s", err.Error())
 		rollbackError(str, session)
@@ -268,9 +269,62 @@ func (handle *DBHandler) UpdateFtMark(body *datastruct.UpdateFtMarkBody, ft_id i
 	engine := handle.mysqlEngine
 	hot_ft := new(datastruct.HotFTInfo)
 	hot_ft.Mark = body.Mark
-	_, err := engine.Where("id=?", ft_id).Cols("mark").Update(hot_ft)
+	_, err := engine.Where("f_t_id=?", ft_id).Cols("mark").Update(hot_ft)
 	if err != nil {
 		log.Error("DBHandler->UpdateFtMark err:%s", err.Error())
+		return datastruct.UpdateDataFailed
+	}
+	return datastruct.NULLError
+}
+
+func (handle *DBHandler) UpdateFtIntroduction(body *datastruct.UpdateFtIntroductionBody, ft_id int) datastruct.CodeType {
+	engine := handle.mysqlEngine
+	session := engine.NewSession()
+	defer session.Close()
+	session.Begin()
+	cold_ft := new(datastruct.ColdFTInfo)
+	cold_ft.Introduction = body.Desc
+	_, err := session.Where("id=?", ft_id).Cols("introduction").Update(cold_ft)
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->UpdateFtIntroduction err0: %s", err.Error())
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+
+	//get shop_id
+	sql := "select id from shop_info where f_t_id = ?"
+	results, err := session.Query(sql, ft_id)
+	if err != nil || len(results) <= 0 {
+		str := fmt.Sprintf("DBHandler->UpdateFtIntroduction get shop_id err")
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+
+	shop_id := tools.StringToInt(string(results[0]["id"][:]))
+	sql = "delete from shop_imgs where shop_id = ?"
+	_, err = session.Exec(sql, shop_id)
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->UpdateFtIntroduction err1: %s", err.Error())
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+	sql = "insert into shop_imgs(shop_id,img_url) values "
+	values := ""
+	tmp := ""
+	for i := 0; i < len(body.Imgs); i++ {
+		if i == 0 {
+			tmp = fmt.Sprintf("(%d,%s)", shop_id, body.Imgs[i])
+		} else {
+			tmp = fmt.Sprintf(",(%d,%s)", shop_id, body.Imgs[i])
+		}
+		values += tmp
+	}
+
+	sql = sql + values
+	_, err = session.Exec(sql, shop_id)
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->UpdateFtIntroduction err2: %s", err.Error())
+		rollbackError(str, session)
 		return datastruct.UpdateDataFailed
 	}
 	return datastruct.NULLError

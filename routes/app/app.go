@@ -163,6 +163,19 @@ func updateFtMark(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func updateFtIntroduction(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/introduce"
+	r.POST(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		c.JSON(200, gin.H{
+			"code": handle.UpdateFtIntroduction(c, id),
+		})
+	})
+}
+
 // func ftIsOnline(r *gin.Engine, handle *handle.AppHandler) {
 // 	url := "/app/ft/online"
 // 	r.POST(url, func(c *gin.Context) {
@@ -245,5 +258,6 @@ func RegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	ftInfo(r, handle)
 	updateFtInfo(r, handle)
 	updateFtMark(r, handle)
+	updateFtIntroduction(r, handle)
 	// ftIsOnline(r, handle)
 }

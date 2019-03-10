@@ -86,6 +86,15 @@ func (app *AppHandler) UpdateFtMark(c *gin.Context, ft_id int) datastruct.CodeTy
 	return app.dbHandler.UpdateFtMark(&body, ft_id)
 }
 
+func (app *AppHandler) UpdateFtIntroduction(c *gin.Context, ft_id int) datastruct.CodeType {
+	var body datastruct.UpdateFtIntroductionBody
+	err := c.BindJSON(&body)
+	if err != nil || body.Desc == "" || len(body.Imgs) <= 0 {
+		return datastruct.ParamError
+	}
+	return app.dbHandler.UpdateFtIntroduction(&body, ft_id)
+}
+
 func (app *AppHandler) GetFtInfo(ft_id int) (interface{}, datastruct.CodeType) {
 	return app.dbHandler.GetFtInfo(ft_id)
 }

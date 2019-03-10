@@ -31,3 +31,8 @@ type UpdateFtInfoBody struct {
 type UpdateFtMarkBody struct {
 	Mark string `json:"mark"`
 }
+
+type UpdateFtIntroductionBody struct {
+	Imgs []string `json:"imgs"`
+	Desc string   `json:"desc"`
+}
