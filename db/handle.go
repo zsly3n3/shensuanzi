@@ -247,7 +247,11 @@ func (handle *DBHandler) GetFtDataWithToken(token string) (*datastruct.FtRedisDa
 	redis_data.FtId = tools.StringToInt(string(mp["f_t_id"][:]))
 	redis_data.AccountState = datastruct.AccountState(tools.StringToInt(string(mp["f_t_id"][:])))
 	sql = "update hot_f_t_info set login_time = ? where token = ?"
-	engine.Exec(sql, time.Now().Unix(), token)
+	_, err = engine.Exec(sql, time.Now().Unix(), token)
+	if err != nil {
+		log.Error("GetFtDataWithToken err:%s", err.Error())
+		return nil, false
+	}
 
 	return redis_data, true
 }
