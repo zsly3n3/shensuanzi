@@ -87,9 +87,9 @@ func SyncDB(engine *xorm.Engine) {
 
 	arr = append(arr, new(datastruct.FTQuickReply))
 	arr = append(arr, new(datastruct.FTMarkInfo))
-	arr = append(arr, new(datastruct.DomainInfo))
+	//arr = append(arr, new(datastruct.DomainInfo))
 	arr = append(arr, new(datastruct.CustomerServiceInfo))
-	arr = append(arr, new(datastruct.ServerInfo))
+	//arr = append(arr, new(datastruct.ServerInfo))
 
 	//.DropTables(arr...) //test
 

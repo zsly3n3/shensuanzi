@@ -113,6 +113,7 @@ func (app *AppHandler) IsExistFt(token string) (int, bool, bool) {
 			if ft_data.AccountState == datastruct.BlackList {
 				isBlackList = true
 			}
+			ft_id = ft_data.FtId
 			app.cacheHandler.SetFtToken(conn, ft_data)
 			app.cacheHandler.AddExpire(conn, token)
 		}
