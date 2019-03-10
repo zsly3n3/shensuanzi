@@ -325,7 +325,7 @@ func (handle *DBHandler) UpdateFtIntroduction(body *datastruct.UpdateFtIntroduct
 	}
 
 	sql = sql + values
-	_, err = session.Exec(sql, shop_id)
+	_, err = session.Exec(sql)
 	if err != nil {
 		str := fmt.Sprintf("DBHandler->UpdateFtIntroduction err2: %s", err.Error())
 		rollbackError(str, session)
