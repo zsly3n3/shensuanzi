@@ -91,7 +91,7 @@ func SyncDB(engine *xorm.Engine) {
 	arr = append(arr, new(datastruct.CustomerServiceInfo))
 	arr = append(arr, new(datastruct.ServerInfo))
 
-	engine.DropTables(arr...) //test
+	//.DropTables(arr...) //test
 
 	err = engine.Sync2(arr...)
 	errhandle(err)
