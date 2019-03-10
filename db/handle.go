@@ -331,5 +331,13 @@ func (handle *DBHandler) UpdateFtIntroduction(body *datastruct.UpdateFtIntroduct
 		rollbackError(str, session)
 		return datastruct.UpdateDataFailed
 	}
+
+	err = session.Commit()
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->UpdateFtIntroduction Commit :%s", err.Error())
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+
 	return datastruct.NULLError
 }
