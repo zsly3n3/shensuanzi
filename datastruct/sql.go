@@ -275,14 +275,13 @@ type OrderRightsFinishedMsg struct {
 	CreatedAt    int64  `xorm:"bigint not null COMMENT('创建时间')"`
 }
 
-/*用户退款通知*/
+/*用户收到的退款通知*/
 type UserOrderRefundMsg struct {
 	Id               int64                     `xorm:"not null pk bigint COMMENT('订单Id')"`
 	UserId           int64                     `xorm:"bigint not null COMMENT('用户Id')"`
 	ProductName      string                    `xorm:"VARCHAR(50) not null COMMENT('产品名称')"`
 	RefundResultType UserOrderRefundResultType `xorm:"TINYINT(1) not null COMMENT('0为命理师同意退款,1为命理师不同意退款,2为系统自动退款')"`
 	UserRead         bool                      `xorm:"TINYINT(1) not null default 0 COMMENT('用户是否已读')"`
-	FTRead           bool                      `xorm:"TINYINT(1) not null default 0 COMMENT('命理师是否已读')"`
 	CreatedAt        int64                     `xorm:"bigint not null COMMENT('创建时间')"`
 }
 
@@ -303,11 +302,10 @@ type FTRegisterMsg struct {
 /*命理师收到的退款通知*/
 type FTOrderRefundMsg struct {
 	Id           int64               `xorm:"not null pk bigint COMMENT('订单Id')"`
-	UserId       int64               `xorm:"bigint not null COMMENT('用户Id')"`
+	FTId         int                 `xorm:"INT(11) not null COMMENT('命理师Id')"`
 	UserNickName string              `xorm:"VARCHAR(100) null COMMENT('用户昵称')"`
 	ProductName  string              `xorm:"VARCHAR(50) not null COMMENT('产品名称')"`
 	RefundType   UserOrderRefundType `xorm:"TINYINT(1) not null default 0 COMMENT('0为用户申请退款')"`
-	UserRead     bool                `xorm:"TINYINT(1) not null default 0 COMMENT('用户是否已读')"`
 	FTRead       bool                `xorm:"TINYINT(1) not null default 0 COMMENT('命理师是否已读')"`
 	CreatedAt    int64               `xorm:"bigint not null COMMENT('创建时间')"`
 }

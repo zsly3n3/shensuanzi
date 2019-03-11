@@ -514,3 +514,40 @@ func (handle *DBHandler) GetAppraised(ft_id int, pageIndex int, pageSize int) (i
 	}
 	return rs, datastruct.NULLError
 }
+
+func (handle *DBHandler) GetFtUnReadMsgCount(ft_id int) (interface{}, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+	where_str := "f_t_read = 0 and f_t_id = ?"
+	arr := make([]interface{}, 0)
+	arr = append(arr, new(datastruct.OrderInfoMsg))
+	arr = append(arr, new(datastruct.OrderRightsFinishedMsg))
+	arr = append(arr, new(datastruct.FTRegisterMsg))
+	arr = append(arr, new(datastruct.FTOrderRefundMsg))
+
+	count, err := engine.Where(where_str, ft_id).Count(arr...)
+	if err != nil {
+		log.Error("DBHandler->GetFtUnReadMsgCount err:", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+
+	return count, datastruct.NULLError
+}
+
+func (handle *DBHandler) GetUserUnReadMsgCount(user_id int) (interface{}, datastruct.CodeType) {
+
+	engine := handle.mysqlEngine
+	where_str := "user_read = 0 and user_id = ?"
+	arr := make([]interface{}, 0)
+	arr = append(arr, new(datastruct.OrderInfoMsg))
+	arr = append(arr, new(datastruct.OrderRightsFinishedMsg))
+	arr = append(arr, new(datastruct.UserRegisterMsg))
+	arr = append(arr, new(datastruct.UserOrderRefundMsg))
+
+	count, err := engine.Where(where_str, user_id).Count(arr...)
+	if err != nil {
+		log.Error("DBHandler->GetUserUnReadMsgCount err:", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+
+	return count, datastruct.NULLError
+}

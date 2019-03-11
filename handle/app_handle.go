@@ -129,6 +129,10 @@ func (app *AppHandler) GetAppraised(c *gin.Context, ft_id int) (interface{}, dat
 	return app.dbHandler.GetAppraised(ft_id, pageIndex, pageSize)
 }
 
+func (app *AppHandler) GetFtUnReadMsgCount(ft_id int) (interface{}, datastruct.CodeType) {
+	return app.dbHandler.GetFtUnReadMsgCount(ft_id)
+}
+
 func (app *AppHandler) GetFtInfo(ft_id int) (interface{}, datastruct.CodeType) {
 	return app.dbHandler.GetFtInfo(ft_id)
 }
