@@ -11,9 +11,9 @@ type RespFtInfo struct {
 }
 
 type AuthIcon struct {
-	IdCard bool `json:"idcard"` //身份证图标是否点亮
-	IsCP   bool `json:"cp"`     //消费保障图标是否点亮
-	IsHR   bool `json:"hr"`     //金牌推荐是否点亮
+	IdCard IdCardState `json:"idcard"` //身份证图标是否点亮
+	IsCP   bool        `json:"cp"`     //消费保障图标是否点亮
+	IsHR   bool        `json:"hr"`     //金牌推荐是否点亮
 }
 
 type RespFtLogin struct {

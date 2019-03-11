@@ -42,7 +42,7 @@ func (app *AppHandler) FtRegister(c *gin.Context) datastruct.CodeType {
 func (app *AppHandler) FtRegisterWithID(c *gin.Context) datastruct.CodeType {
 	var body datastruct.FTRegisterWithIDBody
 	err := c.BindJSON(&body)
-	if err != nil || body.Phone == "" || body.Pwd == "" || body.NickName == "" || body.Avatar == "" || body.Mark == "" || len(body.Desc) < 5 || body.ActualName == "" || body.Identity == "" || body.IdFrontCover == "" || body.IdBehindCover == "" {
+	if err != nil || body.Phone == "" || body.Pwd == "" || body.NickName == "" || body.Avatar == "" || body.Mark == "" || len(body.Desc) < 5 || body.ActualName == "" || len(body.Identity) != 18 || body.IdFrontCover == "" || body.IdBehindCover == "" {
 		return datastruct.ParamError
 	}
 	return app.dbHandler.FtRegisterWithID(&body)
@@ -101,6 +101,14 @@ func (app *AppHandler) UpdateFtAutoReply(c *gin.Context, ft_id int) datastruct.C
 		return datastruct.ParamError
 	}
 	return app.dbHandler.UpdateFtAutoReply(&body, ft_id)
+}
+func (app *AppHandler) FtSubmitIdentity(c *gin.Context, ft_id int) (interface{}, datastruct.CodeType) {
+	var body datastruct.FtIdentity
+	err := c.BindJSON(&body)
+	if err != nil || body.ActualName == "" || body.IdBehindCover == "" || body.IdFrontCover == "" || len(body.Identity) != 18 {
+		return nil, datastruct.ParamError
+	}
+	return app.dbHandler.FtSubmitIdentity(&body, ft_id)
 }
 
 func (app *AppHandler) GetFtIntroduction(ft_id int) (interface{}, datastruct.CodeType) {

@@ -223,12 +223,7 @@ func getFtInfo(ft_id int, engine *xorm.Engine) (*datastruct.RespFtInfo, datastru
 	authIcon := new(datastruct.AuthIcon)
 	authIcon.IsCP = tools.StringToBool(string(mp["is_c_p"][:]))
 	authIcon.IsHR = tools.StringToBool(string(mp["is_h_r"][:]))
-	idCardState := tools.StringToIdCardState(string(mp["id_card_state"][:]))
-	if idCardState == datastruct.IdCardPassed {
-		authIcon.IdCard = true
-	} else {
-		authIcon.IdCard = false
-	}
+	authIcon.IdCard = tools.StringToIdCardState(string(mp["id_card_state"][:]))
 	info.AuthIcon = authIcon
 	return info, datastruct.NULLError
 }
@@ -453,4 +448,33 @@ func (handle *DBHandler) UpdateFtAutoReply(body *datastruct.UpdateFtAutoReplyBod
 	}
 
 	return datastruct.NULLError
+}
+
+func (handle *DBHandler) FtSubmitIdentity(body *datastruct.FtIdentity, ft_id int) (interface{}, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+	session := engine.NewSession()
+	defer session.Close()
+	session.Begin()
+
+	ft_cold := new(datastruct.ColdFTInfo)
+	ft_cold.IdentityCard = body.Identity
+	ft_cold.ActualName = body.ActualName
+	ft_cold.IdBehindCover = body.IdBehindCover
+	ft_cold.IdFrontCover = body.IdFrontCover
+	_, err := session.Where("id=?", ft_id).Cols("identity_card", "actual_name", "id_behind_cover", "id_front_cover").Update(ft_cold)
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->FtSubmitIdentity err0: %s", err.Error())
+		rollbackError(str, session)
+		return nil, datastruct.UpdateDataFailed
+	}
+
+	auth := new(datastruct.Authentication)
+	auth.IdCardState = datastruct.IdCardSubmited
+	_, err = session.Where("f_t_id=?", ft_id).Cols("id_card_state").Update(auth)
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->FtSubmitIdentity err1: %s", err.Error())
+		rollbackError(str, session)
+		return nil, datastruct.UpdateDataFailed
+	}
+	return auth.IdCardState, datastruct.NULLError
 }

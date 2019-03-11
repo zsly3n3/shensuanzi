@@ -231,6 +231,27 @@ func getFtAutoReply(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func ftSubmitIdentity(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/submitidentity"
+	r.POST(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.FtSubmitIdentity(c, id)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 // func ftIsOnline(r *gin.Engine, handle *handle.AppHandler) {
 // 	url := "/app/ft/online"
 // 	r.POST(url, func(c *gin.Context) {
@@ -317,5 +338,7 @@ func RegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	getFtIntroduction(r, handle)
 	getFtAutoReply(r, handle)
 	updateFtAutoReply(r, handle)
+	ftSubmitIdentity(r, handle)
+
 	// ftIsOnline(r, handle)
 }

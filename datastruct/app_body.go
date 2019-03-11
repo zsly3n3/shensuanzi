@@ -12,10 +12,7 @@ type FTRegisterBody struct {
 
 type FTRegisterWithIDBody struct {
 	FTRegisterBody
-	Identity      string `json:"identity"`
-	ActualName    string `json:"actualname"`
-	IdFrontCover  string `json:"front"`
-	IdBehindCover string `json:"behind"`
+	FtIdentity
 }
 
 type FtLoginBody struct {
@@ -40,4 +37,11 @@ type UpdateFtIntroductionBody struct {
 type UpdateFtAutoReplyBody struct {
 	AutoReply  string   `json:"autoreply"`
 	QuickReply []string `json:"quickreply"`
+}
+
+type FtIdentity struct {
+	Identity      string `json:"identity"`
+	ActualName    string `json:"actualname"`
+	IdFrontCover  string `json:"front"`
+	IdBehindCover string `json:"behind"`
 }
