@@ -99,6 +99,10 @@ func (app *AppHandler) GetFtIntroduction(ft_id int) (interface{}, datastruct.Cod
 	return app.dbHandler.GetFtIntroduction(ft_id)
 }
 
+func (app *AppHandler) GetFtAutoReply(ft_id int) (interface{}, datastruct.CodeType) {
+	return app.dbHandler.GetFtAutoReply(ft_id)
+}
+
 func (app *AppHandler) GetFtInfo(ft_id int) (interface{}, datastruct.CodeType) {
 	return app.dbHandler.GetFtInfo(ft_id)
 }

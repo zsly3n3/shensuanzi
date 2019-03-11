@@ -36,3 +36,8 @@ type UpdateFtIntroductionBody struct {
 	Imgs []string `json:"imgs"`
 	Desc string   `json:"desc"`
 }
+
+type UpdateFtAutoReplyBody struct {
+	AutoReply  string   `json:"autoreply"`
+	QuickReply []string `json:"quickreply"`
+}

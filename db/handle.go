@@ -366,7 +366,6 @@ func (handle *DBHandler) GetFtIntroduction(ft_id int) (interface{}, datastruct.C
 		log.Error("DBHandler->GetFtIntroduction err2")
 		return nil, datastruct.GetDataFailed
 	}
-
 	arr := make([]string, 0, len(results))
 	for _, v := range results {
 		arr = append(arr, string(v["img_url"][:]))
@@ -374,5 +373,31 @@ func (handle *DBHandler) GetFtIntroduction(ft_id int) (interface{}, datastruct.C
 	resp := new(datastruct.UpdateFtIntroductionBody)
 	resp.Desc = desc
 	resp.Imgs = arr
+	return resp, datastruct.NULLError
+}
+
+func (handle *DBHandler) GetFtAutoReply(ft_id int) (interface{}, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+	sql := "select auto_reply from hot_f_t_info where f_t_id = ?"
+	results, err := engine.Query(sql, ft_id)
+	if err != nil || len(results) < 0 {
+		log.Error("DBHandler->GetFtAutoReply err0")
+		return nil, datastruct.GetDataFailed
+	}
+	autoreply := string(results[0]["auto_reply"][:])
+
+	sql = "select desc from f_t_quick_reply where f_t_id = ? order by id asc"
+	results, err = engine.Query(sql, ft_id)
+	if err != nil || len(results) < 0 {
+		log.Error("DBHandler->GetFtIntroduction err1")
+		return nil, datastruct.GetDataFailed
+	}
+	arr := make([]string, 0, len(results))
+	for _, v := range results {
+		arr = append(arr, string(v["desc"][:]))
+	}
+	resp := new(datastruct.UpdateFtAutoReplyBody)
+	resp.AutoReply = autoreply
+	resp.QuickReply = arr
 	return resp, datastruct.NULLError
 }

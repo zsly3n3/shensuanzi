@@ -137,15 +137,27 @@ func initData(engine *xorm.Engine) {
 	_, err := engine.Exec(execStr)
 	errhandle(err)
 
-	// _, err = engine.Exec("ALTER TABLE user_info CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
-	// errhandle(err)
+	_, err = engine.Exec("ALTER TABLE hot_f_t_info CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+	errhandle(err)
+
+	_, err = engine.Exec("ALTER TABLE cold_f_t_info CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+	errhandle(err)
+
+	_, err = engine.Exec("ALTER TABLE f_t_quick_reply CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+	errhandle(err)
 
 	// execStr = fmt.Sprintf("ALTER TABLE user_info AUTO_INCREMENT = %d", datastruct.UserIdStart)
 	// _, err = engine.Exec(execStr)
 	// errhandle(err)
 
-	// _, err = engine.Exec("ALTER TABLE user_info CHANGE nick_name nick_name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
-	// errhandle(err)
+	_, err = engine.Exec("ALTER TABLE hot_f_t_info CHANGE auto_reply auto_reply VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+	errhandle(err)
+
+	_, err = engine.Exec("ALTER TABLE cold_f_t_info CHANGE nick_name nick_name VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+	errhandle(err)
+
+	_, err = engine.Exec("ALTER TABLE f_t_quick_reply CHANGE desc desc VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+	errhandle(err)
 }
 
 func errhandle(err error) {
