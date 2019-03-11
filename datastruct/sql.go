@@ -424,9 +424,9 @@ type FTAccountChange struct {
 
 /*命理师快捷语*/
 type FTQuickReply struct {
-	Id   int    `xorm:"not null pk autoincr INT(11) COMMENT('自增编号')"`
-	FTId int    `xorm:"not null INT(11) COMMENT('命理师Id')"`
-	Desc string `xorm:"VARCHAR(100) not null COMMENT('快捷回复内容')"`
+	Id    int    `xorm:"not null pk autoincr INT(11) COMMENT('自增编号')"`
+	FTId  int    `xorm:"not null INT(11) COMMENT('命理师Id')"`
+	Reply string `xorm:"VARCHAR(100) not null COMMENT('快捷回复内容')"`
 }
 
 /*命理师标签管理*/

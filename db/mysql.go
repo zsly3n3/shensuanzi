@@ -156,7 +156,7 @@ func initData(engine *xorm.Engine) {
 	_, err = engine.Exec("ALTER TABLE cold_f_t_info CHANGE nick_name nick_name VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
 	errhandle(err)
 
-	_, err = engine.Exec("ALTER TABLE f_t_quick_reply CHANGE `desc` `desc` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+	_, err = engine.Exec("ALTER TABLE f_t_quick_reply CHANGE reply reply VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
 	errhandle(err)
 }
 
