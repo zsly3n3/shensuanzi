@@ -425,7 +425,7 @@ func (handle *DBHandler) UpdateFtAutoReply(body *datastruct.UpdateFtAutoReplyBod
 		return datastruct.UpdateDataFailed
 	}
 
-	sql = "insert into f_t_quick_reply(f_t_id,`desc`) values "
+	sql = "insert into f_t_quick_reply(f_t_id,desc) values "
 	values := ""
 	tmp := ""
 	for i := 0; i < len(body.QuickReply); i++ {
