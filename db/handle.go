@@ -479,10 +479,12 @@ func (handle *DBHandler) FtSubmitIdentity(body *datastruct.FtIdentity, ft_id int
 	return auth.IdCardState, datastruct.NULLError
 }
 
-func (handle *DBHandler) GetAppraised(ft_id int) (interface{}, datastruct.CodeType) {
+func (handle *DBHandler) GetAppraised(ft_id int, pageIndex int, pageSize int) (interface{}, datastruct.CodeType) {
 	engine := handle.mysqlEngine
-	sql := "select ap.user_id,ap.score,ap.mark,ap.appraised_type,ap.desc,ap.is_anonym,ap.created_at,pr.product_name from appraised_info ap join product_info pr on ap.product_id = pr.id join shop_info sh on sh.id = pr.shop_id where sh.f_t_id = ?"
-	results, err := engine.Query(sql, ft_id)
+	start := (pageIndex - 1) * pageSize
+	limit := pageSize
+	sql := "select ap.user_id,ap.score,ap.mark,ap.appraised_type,ap.desc,ap.is_anonym,ap.created_at,pr.product_name from appraised_info ap join product_info pr on ap.product_id = pr.id join shop_info sh on sh.id = pr.shop_id where sh.f_t_id = ? LIMIT ? ?"
+	results, err := engine.Query(sql, ft_id, start, limit)
 	if err != nil {
 		log.Error("DBHandler->GetAppraised err0: %s", err.Error())
 		return nil, datastruct.GetDataFailed

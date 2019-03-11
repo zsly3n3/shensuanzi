@@ -30,5 +30,5 @@ type RespAppraise struct {
 	Desc        string  `json:"desc"`
 	ProductName string  `json:"productname"`
 	IsAnonym    bool    `json:"isanonym"`
-	CreatedAt   int64   `json:"createdat"`
+	CreatedAt   int64   `json:"time"`
 }

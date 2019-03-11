@@ -120,7 +120,15 @@ func (app *AppHandler) GetFtAutoReply(ft_id int) (interface{}, datastruct.CodeTy
 }
 
 func (app *AppHandler) GetAppraised(ft_id int) (interface{}, datastruct.CodeType) {
-	return app.dbHandler.GetAppraised(ft_id)
+	pageIndex := tools.StringToInt(c.Param("pageindex"))
+	pageSize := tools.StringToInt(c.Param("pagesize"))
+	if pageIndex <= 0 || pageSize <= 0 {
+		c.JSON(200, gin.H{
+				"code": datastruct.ParamError,
+		})
+		return
+	}
+	return app.dbHandler.GetAppraised(ft_id,pageIndex,pageSize)
 }
 
 func (app *AppHandler) GetFtInfo(ft_id int) (interface{}, datastruct.CodeType) {

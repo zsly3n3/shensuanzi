@@ -253,7 +253,7 @@ func ftSubmitIdentity(r *gin.Engine, handle *handle.AppHandler) {
 }
 
 func getAppraised(r *gin.Engine, handle *handle.AppHandler) {
-	url := "/app/ft/appraised"
+	url := "/app/ft/appraised/:pageindex/:pagesize"
 	r.GET(url, func(c *gin.Context) {
 		id, _, tf := checkFtToken(c, handle)
 		if !tf {
