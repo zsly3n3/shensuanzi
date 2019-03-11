@@ -346,7 +346,7 @@ func (handle *DBHandler) GetFtIntroduction(ft_id int) (interface{}, datastruct.C
 	engine := handle.mysqlEngine
 	sql := "select introduction from cold_f_t_info where id = ?"
 	results, err := engine.Query(sql, ft_id)
-	if err != nil || len(results) < 0 {
+	if err != nil || len(results) <= 0 {
 		log.Error("DBHandler->GetFtIntroduction err0")
 		return nil, datastruct.GetDataFailed
 	}
@@ -380,13 +380,13 @@ func (handle *DBHandler) GetFtAutoReply(ft_id int) (interface{}, datastruct.Code
 	engine := handle.mysqlEngine
 	sql := "select auto_reply from hot_f_t_info where f_t_id = ?"
 	results, err := engine.Query(sql, ft_id)
-	if err != nil || len(results) < 0 {
+	if err != nil || len(results) <= 0 {
 		log.Error("DBHandler->GetFtAutoReply err0")
 		return nil, datastruct.GetDataFailed
 	}
 	autoreply := string(results[0]["auto_reply"][:])
 
-	sql = "select desc from f_t_quick_reply where f_t_id = ? order by id asc"
+	sql = "select `desc` from f_t_quick_reply where f_t_id = ? order by id asc"
 	results, err = engine.Query(sql, ft_id)
 	if err != nil || len(results) < 0 {
 		log.Error("DBHandler->GetFtIntroduction err1")
