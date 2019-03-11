@@ -401,3 +401,56 @@ func (handle *DBHandler) GetFtAutoReply(ft_id int) (interface{}, datastruct.Code
 	resp.QuickReply = arr
 	return resp, datastruct.NULLError
 }
+
+func (handle *DBHandler) UpdateFtAutoReply(body *datastruct.UpdateFtAutoReplyBody, ft_id int) datastruct.CodeType {
+	engine := handle.mysqlEngine
+	session := engine.NewSession()
+	defer session.Close()
+	session.Begin()
+
+	hot_ft := new(datastruct.HotFTInfo)
+	hot_ft.AutoReply = body.AutoReply
+	_, err := session.Where("f_t_id=?", ft_id).Cols("auto_reply").Update(hot_ft)
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->UpdateFtAutoReply err0: %s", err.Error())
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+
+	sql := "delete from f_t_quick_reply where f_t_id = ?"
+	_, err = session.Exec(sql, ft_id)
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->UpdateFtAutoReply err1: %s", err.Error())
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+
+	sql = "insert into f_t_quick_reply(f_t_id,`desc`) values "
+	values := ""
+	tmp := ""
+	for i := 0; i < len(body.QuickReply); i++ {
+		if i == 0 {
+			tmp = fmt.Sprintf("(%d,%s)", ft_id, body.QuickReply[i])
+		} else {
+			tmp = fmt.Sprintf(",(%d,%s)", ft_id, body.QuickReply[i])
+		}
+		values += tmp
+	}
+
+	sql = sql + values
+	_, err = session.Exec(sql)
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->UpdateFtAutoReply err2: %s", err.Error())
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+
+	err = session.Commit()
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->UpdateFtIntroduction Commit :%s", err.Error())
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+
+	return datastruct.NULLError
+}

@@ -94,6 +94,14 @@ func (app *AppHandler) UpdateFtIntroduction(c *gin.Context, ft_id int) datastruc
 	}
 	return app.dbHandler.UpdateFtIntroduction(&body, ft_id)
 }
+func (app *AppHandler) UpdateFtAutoReply(c *gin.Context, ft_id int) datastruct.CodeType {
+	var body datastruct.UpdateFtAutoReplyBody
+	err := c.BindJSON(&body)
+	if err != nil || body.AutoReply == "" || len(body.QuickReply) <= 0 {
+		return datastruct.ParamError
+	}
+	return app.dbHandler.UpdateFtAutoReply(&body, ft_id)
+}
 
 func (app *AppHandler) GetFtIntroduction(ft_id int) (interface{}, datastruct.CodeType) {
 	return app.dbHandler.GetFtIntroduction(ft_id)
