@@ -280,7 +280,6 @@ func RegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	updateFtInfo(r, handle)
 	updateFtMark(r, handle)
 	updateFtIntroduction(r, handle)
-	updateFtMark(r, handle)
 	getFtIntroduction(r, handle)
 	// ftIsOnline(r, handle)
 }
