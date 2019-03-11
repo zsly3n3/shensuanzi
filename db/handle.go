@@ -350,6 +350,7 @@ func (handle *DBHandler) GetFtIntroduction(ft_id int) (interface{}, datastruct.C
 		log.Error("DBHandler->GetFtIntroduction err0")
 		return nil, datastruct.GetDataFailed
 	}
+	desc := string(results[0]["introduction"][:])
 
 	sql = "select id from shop_info where f_t_id = ?"
 	results, err = engine.Query(sql, ft_id)
@@ -359,7 +360,6 @@ func (handle *DBHandler) GetFtIntroduction(ft_id int) (interface{}, datastruct.C
 	}
 	shop_id := tools.StringToInt(string(results[0]["id"][:]))
 
-	desc := string(results[0]["introduction"][:])
 	sql = "select img_url from shop_imgs where shop_id = ? order by id asc"
 	results, err = engine.Query(sql, shop_id)
 	if err != nil || len(results) < 0 {
