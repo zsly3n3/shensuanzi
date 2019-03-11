@@ -386,7 +386,7 @@ func (handle *DBHandler) GetFtAutoReply(ft_id int) (interface{}, datastruct.Code
 	}
 	autoreply := string(results[0]["auto_reply"][:])
 
-	sql = "select `desc` from f_t_quick_reply where f_t_id = ? order by id asc"
+	sql = "select reply from f_t_quick_reply where f_t_id = ? order by id asc"
 	results, err = engine.Query(sql, ft_id)
 	if err != nil || len(results) < 0 {
 		log.Error("DBHandler->GetFtIntroduction err1")
@@ -394,7 +394,7 @@ func (handle *DBHandler) GetFtAutoReply(ft_id int) (interface{}, datastruct.Code
 	}
 	arr := make([]string, 0, len(results))
 	for _, v := range results {
-		arr = append(arr, string(v["desc"][:]))
+		arr = append(arr, string(v["reply"][:]))
 	}
 	resp := new(datastruct.UpdateFtAutoReplyBody)
 	resp.AutoReply = autoreply
