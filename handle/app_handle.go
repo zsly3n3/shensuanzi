@@ -3,6 +3,7 @@ package handle
 import (
 	"shensuanzi/commondata"
 	"shensuanzi/datastruct"
+	"shensuanzi/tools"
 
 	"github.com/gin-gonic/gin"
 )
@@ -119,16 +120,13 @@ func (app *AppHandler) GetFtAutoReply(ft_id int) (interface{}, datastruct.CodeTy
 	return app.dbHandler.GetFtAutoReply(ft_id)
 }
 
-func (app *AppHandler) GetAppraised(ft_id int) (interface{}, datastruct.CodeType) {
+func (app *AppHandler) GetAppraised(c *gin.Context, ft_id int) (interface{}, datastruct.CodeType) {
 	pageIndex := tools.StringToInt(c.Param("pageindex"))
 	pageSize := tools.StringToInt(c.Param("pagesize"))
 	if pageIndex <= 0 || pageSize <= 0 {
-		c.JSON(200, gin.H{
-				"code": datastruct.ParamError,
-		})
-		return
+		return nil, datastruct.ParamError
 	}
-	return app.dbHandler.GetAppraised(ft_id,pageIndex,pageSize)
+	return app.dbHandler.GetAppraised(ft_id, pageIndex, pageSize)
 }
 
 func (app *AppHandler) GetFtInfo(ft_id int) (interface{}, datastruct.CodeType) {

@@ -259,7 +259,7 @@ func getAppraised(r *gin.Engine, handle *handle.AppHandler) {
 		if !tf {
 			return
 		}
-		data, code := handle.GetAppraised(id)
+		data, code := handle.GetAppraised(c, id)
 		if code == datastruct.NULLError {
 			c.JSON(200, gin.H{
 				"code": code,
