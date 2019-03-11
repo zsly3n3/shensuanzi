@@ -317,9 +317,9 @@ func (handle *DBHandler) UpdateFtIntroduction(body *datastruct.UpdateFtIntroduct
 	tmp := ""
 	for i := 0; i < len(body.Imgs); i++ {
 		if i == 0 {
-			tmp = fmt.Sprintf("(%d,%s)", shop_id, body.Imgs[i])
+			tmp = fmt.Sprintf("(%d,'%s')", shop_id, body.Imgs[i])
 		} else {
-			tmp = fmt.Sprintf(",(%d,%s)", shop_id, body.Imgs[i])
+			tmp = fmt.Sprintf(",(%d,'%s')", shop_id, body.Imgs[i])
 		}
 		values += tmp
 	}
@@ -430,9 +430,9 @@ func (handle *DBHandler) UpdateFtAutoReply(body *datastruct.UpdateFtAutoReplyBod
 	tmp := ""
 	for i := 0; i < len(body.QuickReply); i++ {
 		if i == 0 {
-			tmp = fmt.Sprintf("(%d,%s)", ft_id, body.QuickReply[i])
+			tmp = fmt.Sprintf("(%d,'%s')", ft_id, body.QuickReply[i])
 		} else {
-			tmp = fmt.Sprintf(",(%d,%s)", ft_id, body.QuickReply[i])
+			tmp = fmt.Sprintf(",(%d,'%s')", ft_id, body.QuickReply[i])
 		}
 		values += tmp
 	}
