@@ -32,3 +32,10 @@ type RespAppraise struct {
 	IsAnonym    bool    `json:"isanonym"`
 	CreatedAt   int64   `json:"time"`
 }
+
+type RespRegisterMsg struct {
+	QRCode    string `json:"qrcode"`
+	GZH_Name  string `json:"gzhname"`
+	CreatedAt int64  `json:"time"`
+	Type      int    `json:"type"`
+}

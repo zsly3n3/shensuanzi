@@ -476,6 +476,13 @@ func (handle *DBHandler) FtSubmitIdentity(body *datastruct.FtIdentity, ft_id int
 		rollbackError(str, session)
 		return nil, datastruct.UpdateDataFailed
 	}
+
+	err = session.Commit()
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->FtSubmitIdentity Commit :%s", err.Error())
+		rollbackError(str, session)
+		return nil, datastruct.UpdateDataFailed
+	}
 	return auth.IdCardState, datastruct.NULLError
 }
 
@@ -483,7 +490,7 @@ func (handle *DBHandler) GetAppraised(ft_id int, pageIndex int, pageSize int) (i
 	engine := handle.mysqlEngine
 	start := (pageIndex - 1) * pageSize
 	limit := pageSize
-	sql := "select ap.user_id,ap.score,ap.mark,ap.appraised_type,ap.desc,ap.is_anonym,ap.created_at,pr.product_name from appraised_info ap join product_info pr on ap.product_id = pr.id join shop_info sh on sh.id = pr.shop_id where sh.f_t_id = ? LIMIT ? ?"
+	sql := "select ap.user_id,ap.score,ap.mark,ap.appraised_type,ap.desc,ap.is_anonym,ap.created_at,pr.product_name from appraised_info ap join product_info pr on ap.product_id = pr.id join shop_info sh on sh.id = pr.shop_id where sh.f_t_id = ? LIMIT ?,?"
 	results, err := engine.Query(sql, ft_id, start, limit)
 	if err != nil {
 		log.Error("DBHandler->GetAppraised err0: %s", err.Error())
@@ -556,6 +563,49 @@ func (handle *DBHandler) GetUserUnReadMsgCount(user_id int) (interface{}, datast
 		}
 		count += tmp
 	}
-
 	return count, datastruct.NULLError
+}
+
+func (handle *DBHandler) GetFtMsg(ft_id int, pageIndex int, pageSize int) (interface{}, datastruct.CodeType) {
+	//type 1 f_t_register_msg
+	//type 2 f_t_order_refund_msg
+	//type 3 order_info_msg
+	//type 4 order_rights_finished_msg
+	engine := handle.mysqlEngine
+	start := (pageIndex - 1) * pageSize
+	limit := pageSize
+
+	sql := "select * from (SELECT -1 as id,ftr.f_t_read,ftr.created_at,ftr.f_t_id,1 as type from f_t_register_msg ftr union all select ftor.id,ftor.f_t_read,ftor.created_at,ftor.f_t_id,2 as type from f_t_order_refund_msg ftor union all select oi.id,oi.f_t_read,oi.created_at,oi.f_t_id,3 as type from order_info_msg oi union all select orf.id,orf.f_t_read,orf.created_at,orf.f_t_id,4 as type from order_rights_finished_msg orf) as tmp_msg where f_t_id = ? ORDER BY created_at DESC LIMIT ?,?"
+	results, err := engine.Query(sql, ft_id, start, limit)
+	if err != nil {
+		log.Error("DBHandler->GetFtMsg err0: %s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+	arr := make([]interface{}, 0, len(results))
+	var rs interface{}
+	for _, v := range results {
+		tableType := tools.StringToInt(string(v["type"][:]))
+		isRead := tools.StringToBool(string(v["f_t_read"][:]))
+		switch tableType {
+		case 1:
+			rrm := new(datastruct.RespRegisterMsg)
+			rrm.CreatedAt = tools.StringToInt64(string(v["created_at"][:]))
+			rrm.Type = tableType
+			rrm.GZH_Name = important.WX_GZH_NAME
+			rrm.QRCode = important.WX_GZH_QRCode
+			rs = rrm
+			if !isRead {
+				//update
+			}
+		case 2:
+
+		case 3:
+
+		case 4:
+		}
+		arr = append(arr, rs)
+
+	}
+
+	return sql, datastruct.NULLError
 }
