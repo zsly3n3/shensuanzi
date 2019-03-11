@@ -303,8 +303,8 @@ func (handle *DBHandler) UpdateFtIntroduction(body *datastruct.UpdateFtIntroduct
 		rollbackError(str, session)
 		return datastruct.UpdateDataFailed
 	}
-
 	shop_id := tools.StringToInt(string(results[0]["id"][:]))
+
 	sql = "delete from shop_imgs where shop_id = ?"
 	_, err = session.Exec(sql, shop_id)
 	if err != nil {
@@ -340,4 +340,39 @@ func (handle *DBHandler) UpdateFtIntroduction(body *datastruct.UpdateFtIntroduct
 	}
 
 	return datastruct.NULLError
+}
+
+func (handle *DBHandler) GetFtIntroduction(ft_id int) (interface{}, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+	sql := "select introduction from cold_f_t_info where id = ?"
+	results, err := engine.Query(sql, ft_id)
+	if err != nil || len(results) < 0 {
+		log.Error("DBHandler->GetFtIntroduction err0")
+		return nil, datastruct.GetDataFailed
+	}
+
+	sql = "select id from shop_info where f_t_id = ?"
+	results, err = engine.Query(sql, ft_id)
+	if err != nil || len(results) <= 0 {
+		log.Error("DBHandler->GetFtIntroduction err1")
+		return nil, datastruct.GetDataFailed
+	}
+	shop_id := tools.StringToInt(string(results[0]["id"][:]))
+
+	desc := string(results[0]["introduction"][:])
+	sql = "select img_url from shop_imgs where shop_id = ? order by id asc"
+	results, err = engine.Query(sql, shop_id)
+	if err != nil || len(results) < 0 {
+		log.Error("DBHandler->GetFtIntroduction err2")
+		return nil, datastruct.GetDataFailed
+	}
+
+	arr := make([]string, 0, len(results))
+	for _, v := range results {
+		arr = append(arr, string(v["img_url"][:]))
+	}
+	resp := new(datastruct.UpdateFtIntroductionBody)
+	resp.Desc = desc
+	resp.Imgs = arr
+	return resp, datastruct.NULLError
 }

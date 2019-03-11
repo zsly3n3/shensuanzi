@@ -95,6 +95,10 @@ func (app *AppHandler) UpdateFtIntroduction(c *gin.Context, ft_id int) datastruc
 	return app.dbHandler.UpdateFtIntroduction(&body, ft_id)
 }
 
+func (app *AppHandler) GetFtIntroduction(ft_id int) (interface{}, datastruct.CodeType) {
+	return app.dbHandler.GetFtIntroduction(ft_id)
+}
+
 func (app *AppHandler) GetFtInfo(ft_id int) (interface{}, datastruct.CodeType) {
 	return app.dbHandler.GetFtInfo(ft_id)
 }

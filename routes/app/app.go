@@ -176,6 +176,27 @@ func updateFtIntroduction(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func getFtIntroduction(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/introduce"
+	r.GET(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.GetFtIntroduction(id)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 // func ftIsOnline(r *gin.Engine, handle *handle.AppHandler) {
 // 	url := "/app/ft/online"
 // 	r.POST(url, func(c *gin.Context) {
@@ -259,5 +280,7 @@ func RegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	updateFtInfo(r, handle)
 	updateFtMark(r, handle)
 	updateFtIntroduction(r, handle)
+	updateFtMark(r, handle)
+	getFtIntroduction(r, handle)
 	// ftIsOnline(r, handle)
 }
