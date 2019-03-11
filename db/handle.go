@@ -523,13 +523,16 @@ func (handle *DBHandler) GetFtUnReadMsgCount(ft_id int) (interface{}, datastruct
 	arr = append(arr, new(datastruct.OrderRightsFinishedMsg))
 	arr = append(arr, new(datastruct.FTRegisterMsg))
 	arr = append(arr, new(datastruct.FTOrderRefundMsg))
-
-	count, err := engine.Where(where_str, ft_id).Count(arr...)
-	if err != nil {
-		log.Error("DBHandler->GetFtUnReadMsgCount err:", err.Error())
-		return nil, datastruct.GetDataFailed
+	var count int64
+	count = 0
+	for _, v := range arr {
+		tmp, err := engine.Where(where_str, ft_id).Count(v)
+		if err != nil {
+			log.Error("DBHandler->GetFtUnReadMsgCount err:", err.Error())
+			return nil, datastruct.GetDataFailed
+		}
+		count += tmp
 	}
-
 	return count, datastruct.NULLError
 }
 
@@ -543,10 +546,15 @@ func (handle *DBHandler) GetUserUnReadMsgCount(user_id int) (interface{}, datast
 	arr = append(arr, new(datastruct.UserRegisterMsg))
 	arr = append(arr, new(datastruct.UserOrderRefundMsg))
 
-	count, err := engine.Where(where_str, user_id).Count(arr...)
-	if err != nil {
-		log.Error("DBHandler->GetUserUnReadMsgCount err:", err.Error())
-		return nil, datastruct.GetDataFailed
+	var count int64
+	count = 0
+	for _, v := range arr {
+		tmp, err := engine.Where(where_str, user_id).Count(v)
+		if err != nil {
+			log.Error("DBHandler->GetUserUnReadMsgCount err:", err.Error())
+			return nil, datastruct.GetDataFailed
+		}
+		count += tmp
 	}
 
 	return count, datastruct.NULLError
