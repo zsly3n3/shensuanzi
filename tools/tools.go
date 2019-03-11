@@ -92,6 +92,11 @@ func StringToInt64(tmp string) int64 {
 	return rs
 }
 
+func StringToFloat64(tmp string) float64 {
+	rs, _ := strconv.ParseFloat(tmp, 64)
+	return rs
+}
+
 func StringToIdCardState(value string) datastruct.IdCardState {
 	rs := StringToInt(value)
 	return datastruct.IdCardState(rs)

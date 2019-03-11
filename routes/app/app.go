@@ -252,6 +252,27 @@ func ftSubmitIdentity(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func getAppraised(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/appraised"
+	r.GET(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.GetAppraised(id)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 // func ftIsOnline(r *gin.Engine, handle *handle.AppHandler) {
 // 	url := "/app/ft/online"
 // 	r.POST(url, func(c *gin.Context) {
@@ -339,6 +360,6 @@ func RegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	getFtAutoReply(r, handle)
 	updateFtAutoReply(r, handle)
 	ftSubmitIdentity(r, handle)
-
+	getAppraised(r, handle)
 	// ftIsOnline(r, handle)
 }

@@ -84,7 +84,7 @@ type AppraisedInfo struct {
 	Desc          string        `xorm:"VARCHAR(255) null COMMENT('评价描述')"`
 	IsAnonym      bool          `xorm:"TINYINT(1) not null COMMENT('是否匿名')"`
 	IsFake        bool          `xorm:"TINYINT(1) not null COMMENT('是否为假数据')"`
-	IsPassed      bool          `xorm:"TINYINT(1) not null COMMENT('是否审核通过')"`
+	IsPassed      bool          `xorm:"TINYINT(1) not null default 1 COMMENT('是否审核通过')"`
 	CreatedAt     int64         `xorm:"bigint not null COMMENT('评价时间')"`
 }
 

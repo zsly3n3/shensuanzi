@@ -478,3 +478,37 @@ func (handle *DBHandler) FtSubmitIdentity(body *datastruct.FtIdentity, ft_id int
 	}
 	return auth.IdCardState, datastruct.NULLError
 }
+
+func (handle *DBHandler) GetAppraised(ft_id int) (interface{}, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+	sql := "select ap.user_id,ap.score,ap.mark,ap.appraised_type,ap.desc,ap.is_anonym,ap.created_at,pr.product_name from appraised_info ap join product_info pr on ap.product_id = pr.id join shop_info sh on sh.id = pr.shop_id where sh.f_t_id = ?"
+	results, err := engine.Query(sql, ft_id)
+	if err != nil {
+		log.Error("DBHandler->GetAppraised err0: %s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+	rs := make([]*datastruct.RespAppraise, 0, len(results))
+	for _, v := range results {
+		ap := new(datastruct.RespAppraise)
+		is_anonym := tools.StringToBool(string(v["is_anonym"][:]))
+		if is_anonym {
+			user_id := tools.StringToInt64(string(v["user_id"][:]))
+			sql = "select nick_name,avatar from cold_user_info where id = ?"
+			sub_results, sub_err := engine.Query(sql, user_id)
+			if sub_err != nil || len(sub_results) <= 0 {
+				log.Error("DBHandler->GetAppraised err1: the user is not exist, id is %v", user_id)
+				return nil, datastruct.GetDataFailed
+			}
+			ap.Name = string(sub_results[0]["nick_name"][:])
+			ap.Avatar = string(sub_results[0]["avatar"][:])
+		}
+		ap.IsAnonym = is_anonym
+		ap.CreatedAt = tools.StringToInt64(string(v["created_at"][:]))
+		ap.Desc = string(v["desc"][:])
+		ap.Mark = string(v["mark"][:])
+		ap.ProductName = string(v["product_name"][:])
+		ap.Score = tools.StringToFloat64(string(v["score"][:]))
+		rs = append(rs, ap)
+	}
+	return rs, datastruct.NULLError
+}

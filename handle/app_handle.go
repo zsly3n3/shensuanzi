@@ -119,6 +119,10 @@ func (app *AppHandler) GetFtAutoReply(ft_id int) (interface{}, datastruct.CodeTy
 	return app.dbHandler.GetFtAutoReply(ft_id)
 }
 
+func (app *AppHandler) GetAppraised(ft_id int) (interface{}, datastruct.CodeType) {
+	return app.dbHandler.GetAppraised(ft_id)
+}
+
 func (app *AppHandler) GetFtInfo(ft_id int) (interface{}, datastruct.CodeType) {
 	return app.dbHandler.GetFtInfo(ft_id)
 }
