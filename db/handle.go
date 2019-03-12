@@ -595,7 +595,9 @@ func (handle *DBHandler) GetFtMsg(ft_id int, pageIndex int, pageSize int) (inter
 			rrm.QRCode = important.WX_GZH_QRCode
 			rs = rrm
 			if !isRead {
-				//update
+				ftrm := new(datastruct.FTRegisterMsg)
+				ftrm.FTRead = true
+				engine.Where("f_t_id=?", ft_id).Cols("f_t_read").Update(ftrm)
 			}
 		case 2:
 			rrfm := new(datastruct.RespRefundFTMsg)
@@ -606,7 +608,9 @@ func (handle *DBHandler) GetFtMsg(ft_id int, pageIndex int, pageSize int) (inter
 			rrfm.RefundType = datastruct.UserOrderRefundType(tools.StringToInt(string(v["handle"][:])))
 			rrfm.Type = tableType
 			if !isRead {
-				//update
+				ftor := new(datastruct.FTOrderRefundMsg)
+				ftor.FTRead = true
+				engine.Where("id=?", rrfm.OrderId).Cols("f_t_read").Update(ftor)
 			}
 		case 3:
 			toi := new(datastruct.TmpOrderInfoFT)
@@ -616,7 +620,9 @@ func (handle *DBHandler) GetFtMsg(ft_id int, pageIndex int, pageSize int) (inter
 			toi.ProductName = string(v["product_name"][:])
 			toi.Type = tableType
 			if !isRead {
-				//update
+				oi := new(datastruct.OrderInfoMsg)
+				oi.FTRead = true
+				engine.Where("id=?", toi.OrderId).Cols("f_t_read").Update(oi)
 			}
 		case 4:
 			rfm := new(datastruct.RespRightsFinishedFTMsg)
@@ -627,12 +633,12 @@ func (handle *DBHandler) GetFtMsg(ft_id int, pageIndex int, pageSize int) (inter
 			rfm.Type = tableType
 			rfm.IsAgree = tools.StringToBool(string(v["handle"][:]))
 			if !isRead {
-				//update
+				orf := new(datastruct.OrderRightsFinishedMsg)
+				orf.FTRead = true
+				engine.Where("id=?", rfm.OrderId).Cols("f_t_read").Update(orf)
 			}
 		}
 		arr = append(arr, rs)
-
 	}
-
 	return sql, datastruct.NULLError
 }
