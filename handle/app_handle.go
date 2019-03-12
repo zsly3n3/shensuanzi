@@ -147,6 +147,15 @@ func (app *AppHandler) GetFtDndList(c *gin.Context, ft_id int) (interface{}, dat
 	return app.dbHandler.GetFtDndList(ft_id, pageIndex, pageSize)
 }
 
+func (app *AppHandler) RemoveFtDndList(c *gin.Context, ft_id int) datastruct.CodeType {
+	var body datastruct.RemoveWithIdBody
+	err := c.BindJSON(&body)
+	if err != nil || body.Id <= 0 {
+		return datastruct.ParamError
+	}
+	return app.dbHandler.RemoveFtDndList(body.Id, ft_id)
+}
+
 func (app *AppHandler) GetFtUnReadMsgCount(ft_id int) (interface{}, datastruct.CodeType) {
 	return app.dbHandler.GetFtUnReadMsgCount(ft_id)
 }

@@ -311,7 +311,7 @@ func getFtSystemMsg(r *gin.Engine, handle *handle.AppHandler) {
 }
 
 func getFtDndList(r *gin.Engine, handle *handle.AppHandler) {
-	url := "/app/ft/blacklist/:pageindex/:pagesize"
+	url := "/app/ft/dndlist/:pageindex/:pagesize"
 	r.GET(url, func(c *gin.Context) {
 		id, _, tf := checkFtToken(c, handle)
 		if !tf {
@@ -328,6 +328,19 @@ func getFtDndList(r *gin.Engine, handle *handle.AppHandler) {
 				"code": code,
 			})
 		}
+	})
+}
+
+func removeFtDndList(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/dndlist"
+	r.POST(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		c.JSON(200, gin.H{
+			"code": handle.RemoveFtDndList(c, id),
+		})
 	})
 }
 
@@ -392,5 +405,6 @@ func FtRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	getFtUnReadMsgCount(r, handle)
 	getFtSystemMsg(r, handle)
 	getFtDndList(r, handle)
+	removeFtDndList(r, handle)
 	// ftIsOnline(r, handle)
 }

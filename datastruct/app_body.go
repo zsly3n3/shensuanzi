@@ -45,3 +45,7 @@ type FtIdentity struct {
 	IdFrontCover  string `json:"front"`
 	IdBehindCover string `json:"behind"`
 }
+
+type RemoveWithIdBody struct {
+	Id int `json:"id"`
+}

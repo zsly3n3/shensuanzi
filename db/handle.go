@@ -747,3 +747,13 @@ func (handle *DBHandler) GetFtDndList(ft_id int, pageIndex int, pageSize int) (i
 	}
 	return rs, datastruct.NULLError
 }
+
+func (handle *DBHandler) RemoveFtDndList(id int, ft_id int) datastruct.CodeType {
+	engine := handle.mysqlEngine
+	_, err := engine.Where("id=?", id).Delete(new(datastruct.FTDndList))
+	if err != nil {
+		log.Error("DBHandler->RemoveFtDndList err: %s", err.Error())
+		return datastruct.UpdateDataFailed
+	}
+	return datastruct.NULLError
+}
