@@ -411,15 +411,22 @@ type FTBlacklist struct {
 	UserId int64 `xorm:"bigint not null COMMENT('用户Id')"`
 }
 
-/*聊天列表*/
-type ChatList struct {
+/*正在进行的聊天列表*/
+type ChattingList struct {
 	Id        int64 `xorm:"not null pk bigint autoincr COMMENT('自增编号')"`
 	FTId      int   `xorm:"not null INT(11) COMMENT('命理师Id')"`
 	UserId    int64 `xorm:"bigint not null COMMENT('用户Id')"`
 	IsFree    bool  `xorm:"TINYINT(1) not null COMMENT('是否免费对话')"`
-	IsEnd     bool  `xorm:"TINYINT(1) not null COMMENT('是否结束对话')"`
-	CreatedAt int64 `xorm:"bigint not null COMMENT('创建时间')"`
-	UpdatedAt int64 `xorm:"bigint not null default 0 COMMENT('修改时间')"`
+	UpdatedAt int64 `xorm:"bigint not null COMMENT('会话创建时间')"`
+}
+
+/*结束的聊天列表*/
+type ChatEndList struct {
+	Id        int64 `xorm:"not null pk bigint autoincr COMMENT('自增编号')"`
+	FTId      int   `xorm:"not null INT(11) COMMENT('命理师Id')"`
+	UserId    int64 `xorm:"bigint not null COMMENT('用户Id')"`
+	IsFree    bool  `xorm:"TINYINT(1) not null COMMENT('是否免费对话')"`
+	UpdatedAt int64 `xorm:"bigint not null COMMENT('会话创建时间')"`
 }
 
 /*命理师积分明细*/

@@ -82,7 +82,8 @@ func SyncDB(engine *xorm.Engine) {
 	arr = append(arr, new(datastruct.Authentication))
 	arr = append(arr, new(datastruct.PayConsumerProtection))
 	arr = append(arr, new(datastruct.FTBlacklist))
-	arr = append(arr, new(datastruct.ChatList))
+	arr = append(arr, new(datastruct.ChattingList))
+	arr = append(arr, new(datastruct.ChatEndList))
 	arr = append(arr, new(datastruct.FTAccountChange))
 
 	arr = append(arr, new(datastruct.FTQuickReply))
