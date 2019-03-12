@@ -566,7 +566,7 @@ func (handle *DBHandler) GetUserUnReadMsgCount(user_id int) (interface{}, datast
 	return count, datastruct.NULLError
 }
 
-func (handle *DBHandler) GetFtMsg(ft_id int, pageIndex int, pageSize int) (interface{}, datastruct.CodeType) {
+func (handle *DBHandler) GetFtSystemMsg(ft_id int, pageIndex int, pageSize int) (interface{}, datastruct.CodeType) {
 	//type 1 f_t_register_msg
 	//type 2 f_t_order_refund_msg
 	//type 3 order_info_msg

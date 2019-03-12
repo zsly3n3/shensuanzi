@@ -294,6 +294,27 @@ func getFtUnReadMsgCount(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func getFtSystemMsg(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/sysmsg/:pageindex/:pagesize"
+	r.GET(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.GetFtSystemMsg(c, id)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 // func ftIsOnline(r *gin.Engine, handle *handle.AppHandler) {
 // 	url := "/app/ft/online"
 // 	r.POST(url, func(c *gin.Context) {
@@ -383,5 +404,6 @@ func RegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	ftSubmitIdentity(r, handle)
 	getAppraised(r, handle)
 	getFtUnReadMsgCount(r, handle)
+	getFtSystemMsg(r, handle)
 	// ftIsOnline(r, handle)
 }

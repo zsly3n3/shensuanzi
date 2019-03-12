@@ -129,6 +129,15 @@ func (app *AppHandler) GetAppraised(c *gin.Context, ft_id int) (interface{}, dat
 	return app.dbHandler.GetAppraised(ft_id, pageIndex, pageSize)
 }
 
+func (app *AppHandler) GetFtSystemMsg(c *gin.Context, ft_id int) (interface{}, datastruct.CodeType) {
+	pageIndex := tools.StringToInt(c.Param("pageindex"))
+	pageSize := tools.StringToInt(c.Param("pagesize"))
+	if pageIndex <= 0 || pageSize <= 0 {
+		return nil, datastruct.ParamError
+	}
+	return app.dbHandler.GetFtSystemMsg(ft_id, pageIndex, pageSize)
+}
+
 func (app *AppHandler) GetFtUnReadMsgCount(ft_id int) (interface{}, datastruct.CodeType) {
 	return app.dbHandler.GetFtUnReadMsgCount(ft_id)
 }
