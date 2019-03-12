@@ -39,9 +39,9 @@ import (
 func test(r *gin.Engine, handle *handle.AppHandler) {
 	url := "/test"
 	r.GET(url, func(c *gin.Context) {
-	    commondata.DeleteOSSFileWithUrl("https://shensuanzi.oss-cn-shenzhen.aliyuncs.com/ft_avatar_dev/110485312978812928.png")
+		commondata.DeleteOSSFileWithUrl("https://shensuanzi.oss-cn-shenzhen.aliyuncs.com/ft_avatar_dev/110485312978812928.png")
 		c.JSON(200, gin.H{
-			"code": 0
+			"code": 0,
 		})
 	})
 }
