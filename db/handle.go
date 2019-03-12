@@ -578,7 +578,7 @@ func (handle *DBHandler) GetFtSystemMsg(ft_id int, pageIndex int, pageSize int) 
 	sql := "select * from (SELECT -1 as id,ftr.f_t_read,ftr.created_at,ftr.f_t_id,1 as type,-1 as user_nick_name,-1 as product_name,-1 as handle from f_t_register_msg ftr union all select ftor.id,ftor.f_t_read,ftor.created_at,ftor.f_t_id,2 as type,user_nick_name,product_name,refund_type as handle from f_t_order_refund_msg ftor union all select oi.id,oi.f_t_read,oi.created_at,oi.f_t_id,3 as type,user_nick_name,product_name,-1 as handle from order_info_msg oi union all select orf.id,orf.f_t_read,orf.created_at,orf.f_t_id,4 as type,user_nick_name,product_name,is_agree as handle from order_rights_finished_msg orf) as tmp_msg where f_t_id = ? ORDER BY created_at DESC LIMIT ?,?"
 	results, err := engine.Query(sql, ft_id, start, limit)
 	if err != nil {
-		log.Error("DBHandler->GetFtMsg err0: %s", err.Error())
+		log.Error("DBHandler->GetFtSystemMsg err0: %s", err.Error())
 		return nil, datastruct.GetDataFailed
 	}
 	arr := make([]interface{}, 0, len(results))
@@ -639,6 +639,86 @@ func (handle *DBHandler) GetFtSystemMsg(ft_id int, pageIndex int, pageSize int) 
 				orf := new(datastruct.OrderRightsFinishedMsg)
 				orf.FTRead = true
 				engine.Where("id=?", rfm.OrderId).Cols("f_t_read").Update(orf)
+			}
+		}
+		arr = append(arr, rs)
+	}
+	return arr, datastruct.NULLError
+}
+
+func (handle *DBHandler) GetUserSystemMsg(user_id int, pageIndex int, pageSize int) (interface{}, datastruct.CodeType) {
+	//type 1 register_msg
+	//type 2 user_order_refund_msg
+	//type 3 order_info_msg
+	//type 4 order_rights_finished_msg
+	engine := handle.mysqlEngine
+	start := (pageIndex - 1) * pageSize
+	limit := pageSize
+
+	sql := "select * from (select -1 as id,ur.user_read,ur.created_at,ur.user_id,1 as type,-1 as f_t_nick_name,-1 as product_name,-1 as handle from user_register_msg ur union all select uor.id,uor.user_read,uor.created_at,uor.user_id,2 as type,f_t_nick_name,product_name,refund_result_type as handle from user_order_refund_msg uor union all select oi.id,oi.user_read,oi.created_at,oi.user_id,3 as type,f_t_nick_name,product_name,-1 as handle from order_info_msg oi union all select orf.id,orf.user_read,orf.created_at,orf.user_id,4 as type,f_t_nick_name,product_name,is_agree as handle from order_rights_finished_msg orf) as tmp_msg where user_id = ? ORDER BY created_at DESC LIMIT ?,?"
+	results, err := engine.Query(sql, user_id, start, limit)
+	if err != nil {
+		log.Error("DBHandler->GetUserSystemMsg err: %s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+	arr := make([]interface{}, 0, len(results))
+	var rs interface{}
+	for _, v := range results {
+		tableType := tools.StringToInt(string(v["type"][:]))
+		isRead := tools.StringToBool(string(v["user_read"][:]))
+		switch tableType {
+		case 1:
+			rrm := new(datastruct.RespRegisterMsg)
+			rrm.CreatedAt = tools.StringToInt64(string(v["created_at"][:]))
+			rrm.Type = tableType
+			rrm.GZH_Name = important.WX_GZH_NAME
+			rrm.QRCode = important.WX_GZH_QRCode
+			rs = rrm
+			if !isRead {
+				urm := new(datastruct.UserRegisterMsg)
+				urm.UserRead = true
+				engine.Where("user_id=?", user_id).Cols("user_read").Update(urm)
+			}
+		case 2:
+			rrfu := new(datastruct.RespRefundUserMsg)
+			rrfu.CreatedAt = tools.StringToInt64(string(v["created_at"][:]))
+			rrfu.OrderId = tools.StringToInt64(string(v["id"][:]))
+			rrfu.NickName = string(v["f_t_nick_name"][:])
+			rrfu.ProductName = string(v["product_name"][:])
+			rrfu.RefundResultType = datastruct.UserOrderRefundResultType(tools.StringToInt(string(v["handle"][:])))
+			rrfu.Type = tableType
+			rs = rrfu
+			if !isRead {
+				uor := new(datastruct.UserOrderRefundMsg)
+				uor.UserRead = true
+				engine.Where("id=?", rrfu.OrderId).Cols("user_read").Update(uor)
+			}
+		case 3:
+			toi := new(datastruct.TmpOrderInfoFT)
+			toi.CreatedAt = tools.StringToInt64(string(v["created_at"][:]))
+			toi.OrderId = tools.StringToInt64(string(v["id"][:]))
+			toi.NickName = string(v["f_t_nick_name"][:])
+			toi.ProductName = string(v["product_name"][:])
+			toi.Type = tableType
+			rs = toi
+			if !isRead {
+				oi := new(datastruct.OrderInfoMsg)
+				oi.UserRead = true
+				engine.Where("id=?", toi.OrderId).Cols("user_read").Update(oi)
+			}
+		case 4:
+			rfm := new(datastruct.RespRightsFinishedFTMsg)
+			rfm.CreatedAt = tools.StringToInt64(string(v["created_at"][:]))
+			rfm.OrderId = tools.StringToInt64(string(v["id"][:]))
+			rfm.NickName = string(v["f_t_nick_name"][:])
+			rfm.ProductName = string(v["product_name"][:])
+			rfm.Type = tableType
+			rfm.IsAgree = tools.StringToBool(string(v["handle"][:]))
+			rs = rfm
+			if !isRead {
+				orf := new(datastruct.OrderRightsFinishedMsg)
+				orf.UserRead = true
+				engine.Where("id=?", rfm.OrderId).Cols("user_read").Update(orf)
 			}
 		}
 		arr = append(arr, rs)

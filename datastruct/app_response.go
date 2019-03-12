@@ -57,3 +57,8 @@ type TmpOrderInfoFT struct {
 	CreatedAt   int64  `json:"time"`
 	Type        int    `json:"type"`
 }
+
+type RespRefundUserMsg struct {
+	TmpOrderInfoFT
+	RefundResultType UserOrderRefundResultType `json:"refundresulttype"`
+}

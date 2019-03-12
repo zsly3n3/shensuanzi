@@ -280,6 +280,7 @@ type OrderRightsFinishedMsg struct {
 type UserOrderRefundMsg struct {
 	Id               int64                     `xorm:"not null pk bigint COMMENT('订单Id')"`
 	UserId           int64                     `xorm:"bigint not null COMMENT('用户Id')"`
+	FTNickName       string                    `xorm:"VARCHAR(100) null COMMENT('命理师昵称')"`
 	ProductName      string                    `xorm:"VARCHAR(50) not null COMMENT('产品名称')"`
 	RefundResultType UserOrderRefundResultType `xorm:"TINYINT(1) not null COMMENT('0为命理师同意退款,1为命理师不同意退款,2为系统自动退款')"`
 	UserRead         bool                      `xorm:"TINYINT(1) not null default 0 COMMENT('用户是否已读')"`
