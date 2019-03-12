@@ -138,13 +138,13 @@ func (app *AppHandler) GetFtSystemMsg(c *gin.Context, ft_id int) (interface{}, d
 	return app.dbHandler.GetFtSystemMsg(ft_id, pageIndex, pageSize)
 }
 
-func (app *AppHandler) GetFtBlackList(c *gin.Context, ft_id int) (interface{}, datastruct.CodeType) {
+func (app *AppHandler) GetFtDndList(c *gin.Context, ft_id int) (interface{}, datastruct.CodeType) {
 	pageIndex := tools.StringToInt(c.Param("pageindex"))
 	pageSize := tools.StringToInt(c.Param("pagesize"))
 	if pageIndex <= 0 || pageSize <= 0 {
 		return nil, datastruct.ParamError
 	}
-	return app.dbHandler.GetFtBlackList(ft_id, pageIndex, pageSize)
+	return app.dbHandler.GetFtDndList(ft_id, pageIndex, pageSize)
 }
 
 func (app *AppHandler) GetFtUnReadMsgCount(ft_id int) (interface{}, datastruct.CodeType) {

@@ -310,14 +310,14 @@ func getFtSystemMsg(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
-func getFtBlackList(r *gin.Engine, handle *handle.AppHandler) {
+func getFtDndList(r *gin.Engine, handle *handle.AppHandler) {
 	url := "/app/ft/blacklist/:pageindex/:pagesize"
 	r.GET(url, func(c *gin.Context) {
 		id, _, tf := checkFtToken(c, handle)
 		if !tf {
 			return
 		}
-		data, code := handle.GetFtBlackList(c, id)
+		data, code := handle.GetFtDndList(c, id)
 		if code == datastruct.NULLError {
 			c.JSON(200, gin.H{
 				"code": code,
@@ -391,6 +391,6 @@ func FtRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	getAppraised(r, handle)
 	getFtUnReadMsgCount(r, handle)
 	getFtSystemMsg(r, handle)
-	getFtBlackList(r, handle)
+	getFtDndList(r, handle)
 	// ftIsOnline(r, handle)
 }
