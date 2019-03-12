@@ -452,6 +452,22 @@ func (handle *DBHandler) UpdateFtAutoReply(body *datastruct.UpdateFtAutoReplyBod
 
 func (handle *DBHandler) FtSubmitIdentity(body *datastruct.FtIdentity, ft_id int) (interface{}, datastruct.CodeType) {
 	engine := handle.mysqlEngine
+
+	var err error
+	var results []map[string][]byte
+	sql := "select id_front_cover,id_behind_cover from cold_f_t_info where id = ?"
+	results, err = engine.Query(sql, ft_id)
+	if err != nil {
+		log.Error("DBHandler->FtSubmitIdentity get id_cover err:", err.Error())
+		return nil, datastruct.UpdateDataFailed
+	}
+	last_front_cover := ""
+	last_behind_cover := ""
+	if len(results) > 0 {
+		last_front_cover = string(results[0]["id_front_cover"][:])
+		last_behind_cover = string(results[0]["id_behind_cover"][:])
+	}
+
 	session := engine.NewSession()
 	defer session.Close()
 	session.Begin()
@@ -461,7 +477,8 @@ func (handle *DBHandler) FtSubmitIdentity(body *datastruct.FtIdentity, ft_id int
 	ft_cold.ActualName = body.ActualName
 	ft_cold.IdBehindCover = body.IdBehindCover
 	ft_cold.IdFrontCover = body.IdFrontCover
-	_, err := session.Where("id=?", ft_id).Cols("identity_card", "actual_name", "id_behind_cover", "id_front_cover").Update(ft_cold)
+
+	_, err = session.Where("id=?", ft_id).Cols("identity_card", "actual_name", "id_behind_cover", "id_front_cover").Update(ft_cold)
 	if err != nil {
 		str := fmt.Sprintf("DBHandler->FtSubmitIdentity err0: %s", err.Error())
 		rollbackError(str, session)
@@ -482,6 +499,10 @@ func (handle *DBHandler) FtSubmitIdentity(body *datastruct.FtIdentity, ft_id int
 		str := fmt.Sprintf("DBHandler->FtSubmitIdentity Commit :%s", err.Error())
 		rollbackError(str, session)
 		return nil, datastruct.UpdateDataFailed
+	}
+	if last_front_cover != "" || last_behind_cover != "" {
+		commondata.DeleteOSSFileWithUrl(last_front_cover)
+		commondata.DeleteOSSFileWithUrl(last_behind_cover)
 	}
 	return auth.IdCardState, datastruct.NULLError
 }
