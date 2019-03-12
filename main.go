@@ -68,7 +68,8 @@ func createData() (*handle.AppHandler, *handle.WebHandler) {
 }
 
 func registerRoutes(r *gin.Engine, app_hanle *handle.AppHandler, web_hanle *handle.WebHandler) {
-	app.RegisterRoutes(r, app_hanle)
+	app.FtRegisterRoutes(r, app_hanle)
+	app.UserRegisterRoutes(r, app_hanle)
 	web.RegisterRoutes(r, web_hanle)
 }
 
