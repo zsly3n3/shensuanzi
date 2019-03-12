@@ -640,5 +640,5 @@ func (handle *DBHandler) GetFtSystemMsg(ft_id int, pageIndex int, pageSize int) 
 		}
 		arr = append(arr, rs)
 	}
-	return sql, datastruct.NULLError
+	return arr, datastruct.NULLError
 }
