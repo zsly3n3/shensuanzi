@@ -1,6 +1,7 @@
 package app
 
 import (
+	"shensuanzi/commondata"
 	"shensuanzi/handle"
 
 	"github.com/gin-gonic/gin"
@@ -35,6 +36,16 @@ import (
 // 	return userId, token, tf
 // }
 
+func test(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/test"
+	r.GET(url, func(c *gin.Context) {
+	    commondata.DeleteOSSFileWithUrl("https://shensuanzi.oss-cn-shenzhen.aliyuncs.com/ft_avatar_dev/110485312978812928.png")
+		c.JSON(200, gin.H{
+			"code": 0
+		})
+	})
+}
+
 func isExistUserPhone(r *gin.Engine, handle *handle.AppHandler) {
 	url := "/app/user/isexistphone/:phone"
 	isExistPhone(r, handle, url, false)
@@ -42,4 +53,5 @@ func isExistUserPhone(r *gin.Engine, handle *handle.AppHandler) {
 
 func UserRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	isExistUserPhone(r, handle)
+	test(r, handle)
 }

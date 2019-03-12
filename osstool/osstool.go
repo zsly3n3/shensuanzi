@@ -5,6 +5,7 @@ import (
 	"os"
 	"shensuanzi/datastruct/important"
 	"shensuanzi/log"
+	"strings"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
@@ -29,13 +30,20 @@ func CreateOSSBucket() *oss.Bucket {
 	return bucket
 }
 
-func DeleteFile(bucket *oss.Bucket, objectName string) {
-	// 删除单个文件。
+func DeleteFile(bucket *oss.Bucket, url string) {
+	str_arr := strings.Split(url, "/")
+	count := len(str_arr)
+	objectName := ""
+	if count >= 2 {
+		objectName = str_arr[count-2] + "/" + str_arr[count-1]
+	}
+	if objectName == "" {
+		return
+	}
 	err := bucket.DeleteObject(objectName)
 	if err != nil {
 		log.Error("osstool DeleteFile Error:%v", err)
 	}
-	//str_arr := strings.Split(v, "/")
 	//https://shensuanzi.oss-cn-shenzhen.aliyuncs.com/ft_avatar_dev/110485312978812928.png
 }
 
