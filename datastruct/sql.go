@@ -404,11 +404,12 @@ type PayConsumerProtection struct {
 	CreatedAt int64   `xorm:"bigint not null COMMENT('创建时间')"`
 }
 
-/*命理师的黑名单*/
-type FTBlacklist struct {
-	Id     int   `xorm:"not null pk INT(11) autoincr COMMENT('自增编号')"`
-	FTId   int   `xorm:"not null INT(11) COMMENT('命理师Id')"`
-	UserId int64 `xorm:"bigint not null COMMENT('用户Id')"`
+/*命理师的免打扰名单*/
+type FTDndList struct {
+	Id        int   `xorm:"not null pk INT(11) autoincr COMMENT('自增编号')"`
+	FTId      int   `xorm:"not null INT(11) COMMENT('命理师Id')"`
+	UserId    int64 `xorm:"bigint not null COMMENT('用户Id')"`
+	CreatedAt int64 `xorm:"bigint not null COMMENT('创建时间')"`
 }
 
 /*正在进行的聊天列表*/

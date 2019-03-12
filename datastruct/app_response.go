@@ -62,3 +62,10 @@ type RespRefundUserMsg struct {
 	TmpOrderInfoFT
 	RefundResultType UserOrderRefundResultType `json:"refundresulttype"`
 }
+
+type RespDndList struct {
+	Id        int    `json:"id"`
+	NickName  string `json:"nickname"`
+	Avatar    string `json:"avatar"`
+	CreatedAt int64  `json:"time"`
+}

@@ -310,6 +310,27 @@ func getFtSystemMsg(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func getFtBlackList(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/blacklist/:pageindex/:pagesize"
+	r.GET(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.GetFtBlackList(c, id)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 // func ftIsOnline(r *gin.Engine, handle *handle.AppHandler) {
 // 	url := "/app/ft/online"
 // 	r.POST(url, func(c *gin.Context) {
@@ -370,5 +391,6 @@ func FtRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	getAppraised(r, handle)
 	getFtUnReadMsgCount(r, handle)
 	getFtSystemMsg(r, handle)
+	getFtBlackList(r, handle)
 	// ftIsOnline(r, handle)
 }

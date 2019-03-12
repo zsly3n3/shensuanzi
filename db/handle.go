@@ -725,3 +725,25 @@ func (handle *DBHandler) GetUserSystemMsg(user_id int, pageIndex int, pageSize i
 	}
 	return arr, datastruct.NULLError
 }
+
+func (handle *DBHandler) GetFtDndList(ft_id int, pageIndex int, pageSize int) (interface{}, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+	start := (pageIndex - 1) * pageSize
+	limit := pageSize
+	sql := "select dnd.id,dnd.created_at,u.avatar,u.nick_name from f_t_dnd_list dnd join cold_user_info u on dnd.user_id = u.id where dnd.f_t_id = ? order by dnd.created_at desc LIMIT ?,?"
+	results, err := engine.Query(sql, ft_id, start, limit)
+	if err != nil {
+		log.Error("DBHandler->GetFtDndList err: %s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+	rs := make([]*datastruct.RespDndList, 0, len(results))
+	for _, v := range results {
+		dnd := new(datastruct.RespDndList)
+		dnd.Id = tools.StringToInt(string(v["id"][:]))
+		dnd.Avatar = string(v["avatar"][:])
+		dnd.CreatedAt = tools.StringToInt64(string(v["avatar"][:]))
+		dnd.NickName = string(v["nick_name"][:])
+		rs = append(rs, dnd)
+	}
+	return rs, datastruct.NULLError
+}
