@@ -607,6 +607,7 @@ func (handle *DBHandler) GetFtSystemMsg(ft_id int, pageIndex int, pageSize int) 
 			rrfm.ProductName = string(v["product_name"][:])
 			rrfm.RefundType = datastruct.UserOrderRefundType(tools.StringToInt(string(v["handle"][:])))
 			rrfm.Type = tableType
+			rs = rrfm
 			if !isRead {
 				ftor := new(datastruct.FTOrderRefundMsg)
 				ftor.FTRead = true
@@ -619,6 +620,7 @@ func (handle *DBHandler) GetFtSystemMsg(ft_id int, pageIndex int, pageSize int) 
 			toi.NickName = string(v["user_nick_name"][:])
 			toi.ProductName = string(v["product_name"][:])
 			toi.Type = tableType
+			rs = toi
 			if !isRead {
 				oi := new(datastruct.OrderInfoMsg)
 				oi.FTRead = true
@@ -632,6 +634,7 @@ func (handle *DBHandler) GetFtSystemMsg(ft_id int, pageIndex int, pageSize int) 
 			rfm.ProductName = string(v["product_name"][:])
 			rfm.Type = tableType
 			rfm.IsAgree = tools.StringToBool(string(v["handle"][:]))
+			rs = rfm
 			if !isRead {
 				orf := new(datastruct.OrderRightsFinishedMsg)
 				orf.FTRead = true
