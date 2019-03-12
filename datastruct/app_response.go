@@ -39,3 +39,21 @@ type RespRegisterMsg struct {
 	CreatedAt int64  `json:"time"`
 	Type      int    `json:"type"`
 }
+
+type RespRefundFTMsg struct {
+	TmpOrderInfoFT
+	RefundType UserOrderRefundType `json:"refundtype"`
+}
+
+type RespRightsFinishedFTMsg struct {
+	TmpOrderInfoFT
+	IsAgree bool `json:"isagree"`
+}
+
+type TmpOrderInfoFT struct {
+	OrderId     int64  `json:"orderid"`
+	NickName    string `json:"nickname"`
+	ProductName string `json:"productname"`
+	CreatedAt   int64  `json:"time"`
+	Type        int    `json:"type"`
+}

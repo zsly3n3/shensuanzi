@@ -575,7 +575,7 @@ func (handle *DBHandler) GetFtMsg(ft_id int, pageIndex int, pageSize int) (inter
 	start := (pageIndex - 1) * pageSize
 	limit := pageSize
 
-	sql := "select * from (SELECT -1 as id,ftr.f_t_read,ftr.created_at,ftr.f_t_id,1 as type from f_t_register_msg ftr union all select ftor.id,ftor.f_t_read,ftor.created_at,ftor.f_t_id,2 as type from f_t_order_refund_msg ftor union all select oi.id,oi.f_t_read,oi.created_at,oi.f_t_id,3 as type from order_info_msg oi union all select orf.id,orf.f_t_read,orf.created_at,orf.f_t_id,4 as type from order_rights_finished_msg orf) as tmp_msg where f_t_id = ? ORDER BY created_at DESC LIMIT ?,?"
+	sql := "select * from (SELECT -1 as id,ftr.f_t_read,ftr.created_at,ftr.f_t_id,1 as type,-1 as user_nick_name,-1 as product_name,-1 as handle from f_t_register_msg ftr union all select ftor.id,ftor.f_t_read,ftor.created_at,ftor.f_t_id,2 as type,user_nick_name,product_name,refund_type as handle from f_t_order_refund_msg ftor union all select oi.id,oi.f_t_read,oi.created_at,oi.f_t_id,3 as type,user_nick_name,product_name,-1 as handle from order_info_msg oi union all select orf.id,orf.f_t_read,orf.created_at,orf.f_t_id,4 as type,user_nick_name,product_name,is_agree as handle from order_rights_finished_msg orf) as tmp_msg where f_t_id = ? ORDER BY created_at DESC LIMIT ?,?"
 	results, err := engine.Query(sql, ft_id, start, limit)
 	if err != nil {
 		log.Error("DBHandler->GetFtMsg err0: %s", err.Error())
@@ -598,10 +598,37 @@ func (handle *DBHandler) GetFtMsg(ft_id int, pageIndex int, pageSize int) (inter
 				//update
 			}
 		case 2:
-
+			rrfm := new(datastruct.RespRefundFTMsg)
+			rrfm.CreatedAt = tools.StringToInt64(string(v["created_at"][:]))
+			rrfm.OrderId = tools.StringToInt64(string(v["id"][:]))
+			rrfm.NickName = string(v["user_nick_name"][:])
+			rrfm.ProductName = string(v["product_name"][:])
+			rrfm.RefundType = datastruct.UserOrderRefundType(tools.StringToInt(string(v["handle"][:])))
+			rrfm.Type = tableType
+			if !isRead {
+				//update
+			}
 		case 3:
-
+			toi := new(datastruct.TmpOrderInfoFT)
+			toi.CreatedAt = tools.StringToInt64(string(v["created_at"][:]))
+			toi.OrderId = tools.StringToInt64(string(v["id"][:]))
+			toi.NickName = string(v["user_nick_name"][:])
+			toi.ProductName = string(v["product_name"][:])
+			toi.Type = tableType
+			if !isRead {
+				//update
+			}
 		case 4:
+			rfm := new(datastruct.RespRightsFinishedFTMsg)
+			rfm.CreatedAt = tools.StringToInt64(string(v["created_at"][:]))
+			rfm.OrderId = tools.StringToInt64(string(v["id"][:]))
+			rfm.NickName = string(v["user_nick_name"][:])
+			rfm.ProductName = string(v["product_name"][:])
+			rfm.Type = tableType
+			rfm.IsAgree = tools.StringToBool(string(v["handle"][:]))
+			if !isRead {
+				//update
+			}
 		}
 		arr = append(arr, rs)
 
