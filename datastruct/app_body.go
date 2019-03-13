@@ -49,3 +49,11 @@ type FtIdentity struct {
 type RemoveWithIdBody struct {
 	Id int `json:"id"`
 }
+
+type EditProductBody struct {
+	Id          int     `json:"id"`
+	ProductName string  `json:"name"`
+	ProductDesc string  `json:"desc"`
+	Price       float64 `json:"price"`
+	IsHidden    bool    `json:"ishidden"`
+}

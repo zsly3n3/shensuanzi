@@ -32,6 +32,7 @@ const (
 	AuthingCode                                 //账号审核中
 	AuthFailedCode                              //账号审核失败
 	Redirect                                    //重定向
+	Sensitive                                   //敏感词
 )
 
 type Platform int //平台

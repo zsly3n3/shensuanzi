@@ -383,7 +383,7 @@ type ProductInfo struct {
 	ProductDesc string  `xorm:"VARCHAR(500) not null COMMENT('产品描述')"`
 	Price       float64 `xorm:"decimal(16,2) not null  COMMENT('产品价格')"`
 	IsHidden    bool    `xorm:"TINYINT(1) not null COMMENT('是否隐藏')"`
-	SortId      int     `xorm:"not null INT(4) COMMENT('排序Id')"`
+	SortId      int     `xorm:"not null INT(4) default 0 COMMENT('排序Id')"`
 	CreatedAt   int64   `xorm:"bigint not null COMMENT('创建时间')"`
 	UpdatedAt   int64   `xorm:"bigint not null COMMENT('修改时间')"`
 }
@@ -484,4 +484,10 @@ type ServerInfo struct {
 	IsMaintain bool   `xorm:"TINYINT(1) not null COMMENT('是否维护')"`
 	GzhAppid   string `xorm:"CHAR(50) null COMMENT('公众号Appid')"`
 	KfptAppid  string `xorm:"CHAR(50) null COMMENT('开发平台Appid')"`
+}
+
+/*敏感词*/
+type SensitiveWord struct {
+	Id   int64  `xorm:"not null pk bigint COMMENT('编号')"`
+	Word string `xorm:"VARCHAR(255) not null COMMENT('敏感词')"`
 }

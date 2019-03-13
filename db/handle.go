@@ -7,6 +7,7 @@ import (
 	"shensuanzi/datastruct/important"
 	"shensuanzi/log"
 	"shensuanzi/tools"
+	"strings"
 	"time"
 
 	"github.com/go-xorm/xorm"
@@ -305,18 +306,13 @@ func (handle *DBHandler) UpdateFtIntroduction(body *datastruct.UpdateFtIntroduct
 		return datastruct.UpdateDataFailed
 	}
 
-	//get shop_id
-	sql := "select id from shop_info where f_t_id = ?"
-	results, err := session.Query(sql, ft_id)
-	if err != nil || len(results) <= 0 {
-		str := fmt.Sprintf("DBHandler->UpdateFtIntroduction get shop_id err")
-		rollbackError(str, session)
-		return datastruct.UpdateDataFailed
+	shop_id, code := getShopIdWithSession(session, ft_id)
+	if code != datastruct.NULLError {
+		return code
 	}
-	shop_id := tools.StringToInt(string(results[0]["id"][:]))
 
-	sql = "select img_url from shop_imgs where shop_id = ?"
-	results, err = session.Query(sql, shop_id)
+	sql := "select img_url from shop_imgs where shop_id = ?"
+	results, err := session.Query(sql, shop_id)
 	if err != nil {
 		str := fmt.Sprintf("DBHandler->UpdateFtIntroduction get imgs_url err")
 		rollbackError(str, session)
@@ -354,20 +350,17 @@ func (handle *DBHandler) UpdateFtIntroduction(body *datastruct.UpdateFtIntroduct
 		rollbackError(str, session)
 		return datastruct.UpdateDataFailed
 	}
-
 	err = session.Commit()
 	if err != nil {
 		str := fmt.Sprintf("DBHandler->UpdateFtIntroduction Commit :%s", err.Error())
 		rollbackError(str, session)
 		return datastruct.UpdateDataFailed
 	}
-
 	if len(will_DeleteImgs) > 0 {
 		for _, v := range will_DeleteImgs {
 			commondata.DeleteOSSFileWithUrl(v)
 		}
 	}
-
 	return datastruct.NULLError
 }
 
@@ -805,9 +798,96 @@ func (handle *DBHandler) GetFtDndList(ft_id int, pageIndex int, pageSize int) (i
 
 func (handle *DBHandler) RemoveFtDndList(id int, ft_id int) datastruct.CodeType {
 	engine := handle.mysqlEngine
-	_, err := engine.Where("id=?", id).Delete(new(datastruct.FTDndList))
+	_, err := engine.Where("id=? and f_t_id=?", id, ft_id).Delete(new(datastruct.FTDndList))
 	if err != nil {
 		log.Error("DBHandler->RemoveFtDndList err: %s", err.Error())
+		return datastruct.UpdateDataFailed
+	}
+	return datastruct.NULLError
+}
+
+func getShopIdWithSession(session *xorm.Session, ft_id int) (int, datastruct.CodeType) {
+	sql := "select id from shop_info where f_t_id = ?"
+	results, err := session.Query(sql, ft_id)
+	if err != nil || len(results) <= 0 {
+		str := fmt.Sprintf("DBHandler->getShopIdWithSession err")
+		rollbackError(str, session)
+		return -1, datastruct.UpdateDataFailed
+	}
+	shop_id := tools.StringToInt(string(results[0]["id"][:]))
+	return shop_id, datastruct.NULLError
+}
+
+func getShopId(engine *xorm.Engine, ft_id int) (int, datastruct.CodeType) {
+	sql := "select id from shop_info where f_t_id = ?"
+	results, err := engine.Query(sql, ft_id)
+	if err != nil || len(results) <= 0 {
+		log.Error("DBHandler->getShopId err")
+		return -1, datastruct.UpdateDataFailed
+	}
+	shop_id := tools.StringToInt(string(results[0]["id"][:]))
+	return shop_id, datastruct.NULLError
+}
+
+func (handle *DBHandler) EditProduct(body *datastruct.EditProductBody, ft_id int) (interface{}, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+
+	sql := "select word from sensitive_word order by id asc"
+	results, err := engine.Query(sql)
+	if err != nil {
+		log.Error("EditProduct get words err:%s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+
+	for _, v := range results {
+		tmp := string(v["word"][:])
+		if strings.Contains(body.ProductName, tmp) || strings.Contains(body.ProductDesc, tmp) {
+			return tmp, datastruct.Sensitive
+		}
+	}
+
+	shop_id, code := getShopId(engine, ft_id)
+	if code != datastruct.NULLError {
+		return nil, code
+	}
+	isAdd := true
+	if body.Id > 0 {
+		isAdd = false
+	}
+	nowTime := time.Now().Unix()
+	pro := new(datastruct.ProductInfo)
+	pro.UpdatedAt = nowTime
+	pro.IsHidden = body.IsHidden
+	pro.Price = body.Price
+	pro.ProductDesc = body.ProductDesc
+	pro.ProductName = body.ProductName
+	if isAdd {
+		pro.CreatedAt = nowTime
+		pro.ShopId = shop_id
+		_, err := engine.InsertOne(pro)
+		if err != nil {
+			log.Error("DBHandler->EditProduct insert err:%v", err.Error())
+			return nil, datastruct.UpdateDataFailed
+		}
+	} else {
+		_, err := engine.Where("id = ? and shop_id = ?", body.Id, shop_id).Cols("product_name", "product_desc", "price", "is_hidden", "updated_at").Update(pro)
+		if err != nil {
+			log.Error("DBHandler->EditProduct update err:%v", err.Error())
+			return nil, datastruct.UpdateDataFailed
+		}
+	}
+	return nil, datastruct.NULLError
+}
+
+func (handle *DBHandler) RemoveProduct(id int, ft_id int) datastruct.CodeType {
+	engine := handle.mysqlEngine
+	shop_id, code := getShopId(engine, ft_id)
+	if code != datastruct.NULLError {
+		return code
+	}
+	_, err := engine.Where("id=? and shop_id=?", id, shop_id).Delete(new(datastruct.ProductInfo))
+	if err != nil {
+		log.Error("DBHandler->RemoveProduct err: %s", err.Error())
 		return datastruct.UpdateDataFailed
 	}
 	return datastruct.NULLError

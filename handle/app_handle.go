@@ -190,6 +190,24 @@ func (app *AppHandler) RemoveFtDndList(c *gin.Context, ft_id int) datastruct.Cod
 	return app.dbHandler.RemoveFtDndList(body.Id, ft_id)
 }
 
+func (app *AppHandler) EditProduct(c *gin.Context, ft_id int) (interface{}, datastruct.CodeType) {
+	var body datastruct.EditProductBody
+	err := c.BindJSON(&body)
+	if err != nil || body.Price < 20 || body.Price > 3000 || body.ProductDesc != "" || body.ProductName != "" {
+		return nil, datastruct.ParamError
+	}
+	return app.dbHandler.EditProduct(&body, ft_id)
+}
+
+func (app *AppHandler) RemoveProduct(c *gin.Context, ft_id int) datastruct.CodeType {
+	var body datastruct.RemoveWithIdBody
+	err := c.BindJSON(&body)
+	if err != nil || body.Id <= 0 {
+		return datastruct.ParamError
+	}
+	return app.dbHandler.RemoveProduct(body.Id, ft_id)
+}
+
 func (app *AppHandler) GetFtUnReadMsgCount(ft_id int) (interface{}, datastruct.CodeType) {
 	return app.dbHandler.GetFtUnReadMsgCount(ft_id)
 }
