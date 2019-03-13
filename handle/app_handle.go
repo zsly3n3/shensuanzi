@@ -34,19 +34,53 @@ func (app *AppHandler) GetFtMarkInfo() (interface{}, datastruct.CodeType) {
 func (app *AppHandler) FtRegister(c *gin.Context) datastruct.CodeType {
 	var body datastruct.FTRegisterBody
 	err := c.BindJSON(&body)
+	isRemoveFile := false
+	var code datastruct.CodeType
 	if err != nil || body.Phone == "" || body.Pwd == "" || body.NickName == "" || body.Avatar == "" || body.Mark == "" || len(body.Desc) < 5 {
-		return datastruct.ParamError
+		isRemoveFile = true
+		code = datastruct.ParamError
+	} else {
+		code = app.dbHandler.FtRegister(&body)
+		if code != datastruct.NULLError {
+			isRemoveFile = true
+		}
 	}
-	return app.dbHandler.FtRegister(&body)
+	if isRemoveFile {
+		go app.deleteRegisterFile(body.Avatar, "", "")
+	}
+	return code
+}
+
+func (app *AppHandler) deleteRegisterFile(avatar string, IdFrontCover string, IdBehindCover string) {
+	if avatar != "" {
+		commondata.DeleteOSSFileWithUrl(avatar)
+	}
+	if IdFrontCover != "" {
+		commondata.DeleteOSSFileWithUrl(IdFrontCover)
+	}
+	if IdBehindCover != "" {
+		commondata.DeleteOSSFileWithUrl(IdBehindCover)
+	}
 }
 
 func (app *AppHandler) FtRegisterWithID(c *gin.Context) datastruct.CodeType {
 	var body datastruct.FTRegisterWithIDBody
 	err := c.BindJSON(&body)
+	isRemoveFile := false
+	var code datastruct.CodeType
 	if err != nil || body.Phone == "" || body.Pwd == "" || body.NickName == "" || body.Avatar == "" || body.Mark == "" || len(body.Desc) < 5 || body.ActualName == "" || len(body.Identity) != 18 || body.IdFrontCover == "" || body.IdBehindCover == "" {
-		return datastruct.ParamError
+		isRemoveFile = true
+		code = datastruct.ParamError
+	} else {
+		code = app.dbHandler.FtRegisterWithID(&body)
+		if code != datastruct.NULLError {
+			isRemoveFile = true
+		}
 	}
-	return app.dbHandler.FtRegisterWithID(&body)
+	if isRemoveFile {
+		go app.deleteRegisterFile(body.Avatar, body.IdFrontCover, body.IdBehindCover)
+	}
+	return code
 }
 func (app *AppHandler) FtLogin(c *gin.Context) (interface{}, datastruct.CodeType) {
 	var body datastruct.FtLoginBody

@@ -253,13 +253,28 @@ func (handle *DBHandler) GetFtDataWithToken(token string) (*datastruct.FtRedisDa
 
 func (handle *DBHandler) UpdateFtInfo(body *datastruct.UpdateFtInfoBody, ft_id int) datastruct.CodeType {
 	engine := handle.mysqlEngine
+	var err error
+	var results []map[string][]byte
+	sql := "select avatar from cold_f_t_info where id = ?"
+	results, err = engine.Query(sql, ft_id)
+	if err != nil {
+		log.Error("DBHandler->UpdateFtInfo get avatar err:", err.Error())
+		return datastruct.UpdateDataFailed
+	}
+	avatar := ""
+	if len(results) > 0 {
+		avatar = string(results[0]["avatar"][:])
+	}
 	cold_ft := new(datastruct.ColdFTInfo)
 	cold_ft.Avatar = body.Avatar
 	cold_ft.NickName = body.NickName
-	_, err := engine.Where("id=?", ft_id).Cols("nick_name", "avatar").Update(cold_ft)
+	_, err = engine.Where("id=?", ft_id).Cols("nick_name", "avatar").Update(cold_ft)
 	if err != nil {
 		log.Error("DBHandler->UpdateFtInfo err:%s", err.Error())
 		return datastruct.UpdateDataFailed
+	}
+	if avatar != "" {
+		commondata.DeleteOSSFileWithUrl(avatar)
 	}
 	return datastruct.NULLError
 }
@@ -300,6 +315,18 @@ func (handle *DBHandler) UpdateFtIntroduction(body *datastruct.UpdateFtIntroduct
 	}
 	shop_id := tools.StringToInt(string(results[0]["id"][:]))
 
+	sql = "select img_url from shop_imgs where shop_id = ?"
+	results, err = session.Query(sql, shop_id)
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->UpdateFtIntroduction get imgs_url err")
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+	will_DeleteImgs := make([]string, 0, len(results))
+	for _, v := range results {
+		will_DeleteImgs = append(will_DeleteImgs, string(v["img_url"][:]))
+	}
+
 	sql = "delete from shop_imgs where shop_id = ?"
 	_, err = session.Exec(sql, shop_id)
 	if err != nil {
@@ -307,6 +334,7 @@ func (handle *DBHandler) UpdateFtIntroduction(body *datastruct.UpdateFtIntroduct
 		rollbackError(str, session)
 		return datastruct.UpdateDataFailed
 	}
+
 	sql = "insert into shop_imgs(shop_id,img_url) values "
 	values := ""
 	tmp := ""
@@ -332,6 +360,12 @@ func (handle *DBHandler) UpdateFtIntroduction(body *datastruct.UpdateFtIntroduct
 		str := fmt.Sprintf("DBHandler->UpdateFtIntroduction Commit :%s", err.Error())
 		rollbackError(str, session)
 		return datastruct.UpdateDataFailed
+	}
+
+	if len(will_DeleteImgs) > 0 {
+		for _, v := range will_DeleteImgs {
+			commondata.DeleteOSSFileWithUrl(v)
+		}
 	}
 
 	return datastruct.NULLError
