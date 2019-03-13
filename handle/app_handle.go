@@ -199,6 +199,10 @@ func (app *AppHandler) EditProduct(c *gin.Context, ft_id int) (interface{}, data
 	return app.dbHandler.EditProduct(&body, ft_id)
 }
 
+func (app *AppHandler) GetProduct(ft_id int) (interface{}, datastruct.CodeType) {
+	return app.dbHandler.GetProduct(ft_id)
+}
+
 func (app *AppHandler) RemoveProduct(c *gin.Context, ft_id int) datastruct.CodeType {
 	var body datastruct.RemoveWithIdBody
 	err := c.BindJSON(&body)

@@ -850,6 +850,15 @@ func (handle *DBHandler) EditProduct(body *datastruct.EditProductBody, ft_id int
 	if code != datastruct.NULLError {
 		return nil, code
 	}
+
+	count, err := engine.Where("shop_id=?", shop_id).Count(new(datastruct.ProductInfo))
+	if err != nil {
+		return nil, datastruct.GetDataFailed
+	}
+	if count >= datastruct.MAX_PRODUCT_COUNT {
+		return nil, datastruct.MaxCreateCount
+	}
+
 	isAdd := true
 	if body.Id > 0 {
 		isAdd = false
@@ -861,6 +870,7 @@ func (handle *DBHandler) EditProduct(body *datastruct.EditProductBody, ft_id int
 	pro.Price = body.Price
 	pro.ProductDesc = body.ProductDesc
 	pro.ProductName = body.ProductName
+	//pro.SortId = 0
 	if isAdd {
 		pro.CreatedAt = nowTime
 		pro.ShopId = shop_id
@@ -869,7 +879,9 @@ func (handle *DBHandler) EditProduct(body *datastruct.EditProductBody, ft_id int
 			log.Error("DBHandler->EditProduct insert err:%v", err.Error())
 			return nil, datastruct.UpdateDataFailed
 		}
+
 	} else {
+
 		_, err := engine.Where("id = ? and shop_id = ?", body.Id, shop_id).Cols("product_name", "product_desc", "price", "is_hidden", "updated_at").Update(pro)
 		if err != nil {
 			log.Error("DBHandler->EditProduct update err:%v", err.Error())
@@ -891,4 +903,52 @@ func (handle *DBHandler) RemoveProduct(id int, ft_id int) datastruct.CodeType {
 		return datastruct.UpdateDataFailed
 	}
 	return datastruct.NULLError
+}
+
+func (handle *DBHandler) GetProduct(ft_id int) (interface{}, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+	shop_id, code := getShopId(engine, ft_id)
+	if code != datastruct.NULLError {
+		return nil, code
+	}
+	resp := new(datastruct.RespProductInfo)
+	onsale_count, onsale, code := getSaleInfo(shop_id, true, engine)
+	if code != datastruct.NULLError {
+		return nil, code
+	}
+	offsale_count, offsale, code := getSaleInfo(shop_id, false, engine)
+	if code != datastruct.NULLError {
+		return nil, code
+	}
+	resp.OnSaleCount = onsale_count
+	resp.OnSale = onsale
+	resp.OffSaleCount = offsale_count
+	resp.OffSale = offsale
+	resp.Total = onsale_count + offsale_count
+	return resp, datastruct.NULLError
+}
+
+func getSaleInfo(shop_id int, isOnSale bool, engine *xorm.Engine) (int, []*datastruct.TmpProductInfo, datastruct.CodeType) {
+	isHidden := 1
+	if isOnSale {
+		isHidden = 0
+	}
+	sql := "select id,product_name,product_desc,price from product_info where shop_id = ? and is_hidden = ? order by sort_id asc,created_at asc"
+	results, err := engine.Query(sql, shop_id, isHidden)
+	if err != nil {
+		log.Error("DBHandler->GetProduct err0: %s", err.Error())
+		return -1, nil, datastruct.GetDataFailed
+	}
+	sale_count := len(results)
+	sale := make([]*datastruct.TmpProductInfo, 0, sale_count)
+	for _, v := range results {
+		tmp := new(datastruct.TmpProductInfo)
+		tmp.Id = tools.StringToInt(string(v["id"][:]))
+		tmp.Price = tools.StringToFloat64(string(v["price"][:]))
+		tmp.ProductDesc = string(v["product_desc"][:])
+		tmp.ProductName = string(v["product_name"][:])
+		sale = append(sale, tmp)
+	}
+	return sale_count, sale, datastruct.NULLError
+
 }

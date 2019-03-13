@@ -9,7 +9,7 @@ type ServerData struct {
 }
 
 const DefaultId = 1
-
+const MAX_PRODUCT_COUNT = 50
 const Reidis_IdField = "Id"
 const Reidis_AccountStateField = "AccountState"
 const RedisExpireTime = 300 //Redis过期时间300秒
@@ -33,6 +33,7 @@ const (
 	AuthFailedCode                              //账号审核失败
 	Redirect                                    //重定向
 	Sensitive                                   //敏感词
+	MaxCreateCount                              //最大创建数量
 )
 
 type Platform int //平台

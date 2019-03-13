@@ -69,3 +69,18 @@ type RespDndList struct {
 	Avatar    string `json:"avatar"`
 	CreatedAt int64  `json:"time"`
 }
+
+type TmpProductInfo struct {
+	Id          int     `json:"id"`
+	ProductName string  `json:"name"`
+	ProductDesc string  `json:"desc"`
+	Price       float64 `json:"price"`
+}
+
+type RespProductInfo struct {
+	Total        int               `json:"total"`
+	OnSaleCount  int               `json:"onsalecount"`
+	OffSaleCount int               `json:"offsalecount"`
+	OnSale       []*TmpProductInfo `json:"onsale"`
+	OffSale      []*TmpProductInfo `json:"offsale"`
+}
