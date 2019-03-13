@@ -870,7 +870,7 @@ func (handle *DBHandler) EditProduct(body *datastruct.EditProductBody, ft_id int
 	pro.Price = body.Price
 	pro.ProductDesc = body.ProductDesc
 	pro.ProductName = body.ProductName
-	//pro.SortId = 0
+	pro.SortId = 0
 	if isAdd {
 		pro.CreatedAt = nowTime
 		pro.ShopId = shop_id
@@ -879,10 +879,8 @@ func (handle *DBHandler) EditProduct(body *datastruct.EditProductBody, ft_id int
 			log.Error("DBHandler->EditProduct insert err:%v", err.Error())
 			return nil, datastruct.UpdateDataFailed
 		}
-
 	} else {
-
-		_, err := engine.Where("id = ? and shop_id = ?", body.Id, shop_id).Cols("product_name", "product_desc", "price", "is_hidden", "updated_at").Update(pro)
+		_, err := engine.Where("id = ? and shop_id = ?", body.Id, shop_id).Cols("product_name", "product_desc", "price", "is_hidden", "updated_at", "sort_id").Update(pro)
 		if err != nil {
 			log.Error("DBHandler->EditProduct update err:%v", err.Error())
 			return nil, datastruct.UpdateDataFailed
@@ -950,5 +948,12 @@ func getSaleInfo(shop_id int, isOnSale bool, engine *xorm.Engine) (int, []*datas
 		sale = append(sale, tmp)
 	}
 	return sale_count, sale, datastruct.NULLError
-
 }
+
+// func (handle *DBHandler) SortProducts(pids []int, ft_id int) datastruct.CodeType {
+
+//     engine := handle.mysqlEngine
+// 	engine.
+
+// 	return datastruct.NULLError
+// }

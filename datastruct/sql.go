@@ -378,14 +378,14 @@ type ShopImgs struct {
 /*产品信息*/
 type ProductInfo struct {
 	Id          int     `xorm:"not null pk INT(11) autoincr COMMENT('自增编号')"`
-	ShopId      int     `xorm:"not null INT(11) COMMENT('所属店铺Id')"`
-	ProductName string  `xorm:"VARCHAR(50) not null COMMENT('产品名称')"`
-	ProductDesc string  `xorm:"VARCHAR(500) not null COMMENT('产品描述')"`
-	Price       float64 `xorm:"decimal(16,2) not null  COMMENT('产品价格')"`
-	IsHidden    bool    `xorm:"TINYINT(1) not null COMMENT('是否隐藏')"`
+	ShopId      int     `xorm:"not null INT(11) default 0 COMMENT('所属店铺Id')"`
+	ProductName string  `xorm:"VARCHAR(50) not null default '' COMMENT('产品名称')"`
+	ProductDesc string  `xorm:"VARCHAR(500) not null default '' COMMENT('产品描述')"`
+	Price       float64 `xorm:"decimal(16,2) not null default 0 COMMENT('产品价格')"`
+	IsHidden    bool    `xorm:"TINYINT(1) not null default 1 COMMENT('是否隐藏')"`
 	SortId      int     `xorm:"not null INT(4) default 0 COMMENT('排序Id')"`
-	CreatedAt   int64   `xorm:"bigint not null COMMENT('创建时间')"`
-	UpdatedAt   int64   `xorm:"bigint not null COMMENT('修改时间')"`
+	CreatedAt   int64   `xorm:"bigint not null default 0 COMMENT('创建时间')"`
+	UpdatedAt   int64   `xorm:"bigint not null default 0 COMMENT('修改时间')"`
 }
 
 /*命理师认证*/
