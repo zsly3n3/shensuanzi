@@ -398,6 +398,19 @@ func removeProduct(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func sortProducts(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/sortproducts"
+	r.POST(url, func(c *gin.Context) {
+		_, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		c.JSON(200, gin.H{
+			"code": handle.SortProducts(c),
+		})
+	})
+}
+
 // func ftIsOnline(r *gin.Engine, handle *handle.AppHandler) {
 // 	url := "/app/ft/online"
 // 	r.POST(url, func(c *gin.Context) {
@@ -463,5 +476,6 @@ func FtRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	editProduct(r, handle)
 	removeProduct(r, handle)
 	getProduct(r, handle)
+	sortProducts(r, handle)
 	// ftIsOnline(r, handle)
 }

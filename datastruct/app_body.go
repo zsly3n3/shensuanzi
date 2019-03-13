@@ -50,6 +50,10 @@ type RemoveWithIdBody struct {
 	Id int `json:"id"`
 }
 
+type RemoveWithIdsBody struct {
+	Ids []int `json:"ids"`
+}
+
 type EditProductBody struct {
 	Id          int     `json:"id"`
 	ProductName string  `json:"name"`

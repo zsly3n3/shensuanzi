@@ -950,10 +950,36 @@ func getSaleInfo(shop_id int, isOnSale bool, engine *xorm.Engine) (int, []*datas
 	return sale_count, sale, datastruct.NULLError
 }
 
-// func (handle *DBHandler) SortProducts(pids []int, ft_id int) datastruct.CodeType {
+func (handle *DBHandler) SortProducts(pids []int) datastruct.CodeType {
+	engine := handle.mysqlEngine
+	front_sql := "insert into product_info(id,sort_id) values "
+	values := ""
+	back_sql := " on duplicate key update sort_id=values(sort_id)"
+	tmp := ""
+	for i := 0; i < len(pids); i++ {
+		if i == 0 {
+			tmp = fmt.Sprintf("(%d,%d)", pids[i], i)
+		} else {
+			tmp = fmt.Sprintf(",(%d,%d)", pids[i], i)
+		}
+		values += tmp
+	}
+	sql := front_sql + values + back_sql
+	_, err := engine.Exec(sql)
+	if err != nil {
+		log.Error("DBHandler->SortProducts err:%s", err.Error())
+		return datastruct.UpdateDataFailed
+	}
+	return datastruct.NULLError
+}
 
-//     engine := handle.mysqlEngine
-// 	engine.
+// func (handle *DBHandler) GetAllFtOrder(ft_id int) (interface{}, datastruct.CodeType) {
+// 	//user_order_info uoi
+// 	//product_info pro
+// 	//
+// 	SELECT 1 as type,uoi.id,uoi.created_at,uoi.product_id,uoi.user_id,uoc.is_appraised as handle from user_order_info uoi join user_order_check uoc on uoi.id = uoc.id
+// 	//join product_info pro on pro.id = uor.product_id join shop_info si on pro.shop_id = si.id
 
-// 	return datastruct.NULLError
+// 	sql := "select * from (SELECT -1 as id,ftr.f_t_read,ftr.created_at,ftr.f_t_id,1 as type,-1 as user_nick_name,-1 as product_name,-1 as handle from f_t_register_msg ftr union all select ftor.id,ftor.f_t_read,ftor.created_at,ftor.f_t_id,2 as type,user_nick_name,product_name,refund_type as handle from f_t_order_refund_msg ftor) as tmp_msg where f_t_id = ? ORDER BY created_at DESC LIMIT ?,?"
+// 	return sql, datastruct.NULLError
 // }

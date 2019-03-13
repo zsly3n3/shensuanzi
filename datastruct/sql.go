@@ -208,17 +208,15 @@ type UserOrderInfo struct {
 	ProductId    int      `xorm:"not null INT(11) COMMENT('产品Id')"`
 	IsPayForGold bool     `xorm:"TINYINT(1) not null COMMENT('是否用金币购买')"`
 	Platform     Platform `xorm:"TINYINT(1) not null COMMENT('软件平台,如app,h5,pc')"`
-	IsFake       bool     `xorm:"TINYINT(1) not null COMMENT('是否为假数据')"`
 	IsFinished   bool     `xorm:"TINYINT(1) not null COMMENT('是否处理完成')"`
-	CreatedAt    int64    `xorm:"bigint not null COMMENT('创建时间')"`
 }
 
 /*订单结算*/
 type UserOrderCheck struct {
-	Id           int64 `xorm:"not null pk bigint COMMENT('订单Id')"`
-	IsAppraised  bool  `xorm:"TINYINT(1) not null COMMENT('是否已评价')"`
-	IsChecked    bool  `xorm:"TINYINT(1) not null COMMENT('是否已结算')"`
-	FinishedTime int64 `xorm:"bigint not null COMMENT('创建时间')"`
+	Id          int64 `xorm:"not null pk bigint COMMENT('订单Id')"`
+	IsAppraised bool  `xorm:"TINYINT(1) not null COMMENT('是否已评价')"`
+	IsChecked   bool  `xorm:"TINYINT(1) not null COMMENT('是否已结算')"`
+	UpdatedAt   int64 `xorm:"bigint not null COMMENT('更新时间')"`
 }
 
 /*退款结果*/

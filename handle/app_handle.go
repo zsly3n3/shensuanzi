@@ -212,6 +212,15 @@ func (app *AppHandler) RemoveProduct(c *gin.Context, ft_id int) datastruct.CodeT
 	return app.dbHandler.RemoveProduct(body.Id, ft_id)
 }
 
+func (app *AppHandler) SortProducts(c *gin.Context) datastruct.CodeType {
+	var body datastruct.RemoveWithIdsBody
+	err := c.BindJSON(&body)
+	if err != nil || len(body.Ids) <= 0 {
+		return datastruct.ParamError
+	}
+	return app.dbHandler.SortProducts(body.Ids)
+}
+
 func (app *AppHandler) GetFtUnReadMsgCount(ft_id int) (interface{}, datastruct.CodeType) {
 	return app.dbHandler.GetFtUnReadMsgCount(ft_id)
 }
