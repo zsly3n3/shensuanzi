@@ -626,18 +626,19 @@ func (handle *DBHandler) GetFtSystemMsg(ft_id int, pageIndex int, pageSize int) 
 	sql := "select * from (SELECT -1 as id,ftr.f_t_read,ftr.created_at,ftr.f_t_id,1 as type,-1 as user_nick_name,-1 as product_name,-1 as handle from f_t_register_msg ftr union all select ftor.id,ftor.f_t_read,ftor.created_at,ftor.f_t_id,2 as type,user_nick_name,product_name,refund_type as handle from f_t_order_refund_msg ftor union all select oi.id,oi.f_t_read,oi.created_at,oi.f_t_id,3 as type,user_nick_name,product_name,-1 as handle from order_info_msg oi union all select orf.id,orf.f_t_read,orf.created_at,orf.f_t_id,4 as type,user_nick_name,product_name,is_agree as handle from order_rights_finished_msg orf) as tmp_msg where f_t_id = ? ORDER BY created_at DESC LIMIT ?,?"
 	results, err := engine.Query(sql, ft_id, start, limit)
 	if err != nil {
-		log.Error("DBHandler->GetFtSystemMsg err0: %s", err.Error())
+		log.Error("DBHandler->GetFtSystemMsg err: %s", err.Error())
 		return nil, datastruct.GetDataFailed
 	}
 	arr := make([]interface{}, 0, len(results))
 	var rs interface{}
 	for _, v := range results {
 		tableType := tools.StringToInt(string(v["type"][:]))
+		createdAt := tools.StringToInt64(string(v["created_at"][:]))
 		isRead := tools.StringToBool(string(v["f_t_read"][:]))
 		switch tableType {
 		case 1:
 			rrm := new(datastruct.RespRegisterMsg)
-			rrm.CreatedAt = tools.StringToInt64(string(v["created_at"][:]))
+			rrm.CreatedAt = createdAt
 			rrm.Type = tableType
 			rrm.GZH_Name = important.WX_GZH_NAME
 			rrm.QRCode = important.WX_GZH_QRCode
@@ -649,7 +650,7 @@ func (handle *DBHandler) GetFtSystemMsg(ft_id int, pageIndex int, pageSize int) 
 			}
 		case 2:
 			rrfm := new(datastruct.RespRefundFTMsg)
-			rrfm.CreatedAt = tools.StringToInt64(string(v["created_at"][:]))
+			rrfm.CreatedAt = createdAt
 			rrfm.OrderId = tools.StringToInt64(string(v["id"][:]))
 			rrfm.NickName = string(v["user_nick_name"][:])
 			rrfm.ProductName = string(v["product_name"][:])
@@ -663,7 +664,7 @@ func (handle *DBHandler) GetFtSystemMsg(ft_id int, pageIndex int, pageSize int) 
 			}
 		case 3:
 			toi := new(datastruct.TmpOrderInfoFT)
-			toi.CreatedAt = tools.StringToInt64(string(v["created_at"][:]))
+			toi.CreatedAt = createdAt
 			toi.OrderId = tools.StringToInt64(string(v["id"][:]))
 			toi.NickName = string(v["user_nick_name"][:])
 			toi.ProductName = string(v["product_name"][:])
@@ -676,7 +677,7 @@ func (handle *DBHandler) GetFtSystemMsg(ft_id int, pageIndex int, pageSize int) 
 			}
 		case 4:
 			rfm := new(datastruct.RespRightsFinishedFTMsg)
-			rfm.CreatedAt = tools.StringToInt64(string(v["created_at"][:]))
+			rfm.CreatedAt = createdAt
 			rfm.OrderId = tools.StringToInt64(string(v["id"][:]))
 			rfm.NickName = string(v["user_nick_name"][:])
 			rfm.ProductName = string(v["product_name"][:])
@@ -703,8 +704,7 @@ func (handle *DBHandler) GetUserSystemMsg(user_id int, pageIndex int, pageSize i
 	start := (pageIndex - 1) * pageSize
 	limit := pageSize
 
-	sql := "select * from (select -1 as id,ur.user_read,ur.created_at,ur.user_id,1 as type,-1 as f_t_nick_name,-1 as product_name,-1 as handle from user_register_msg ur union all select uor.id,uor.user_read,uor.created_at,uor.user_id,2 as type,f_t_nick_name,product_name,refund_result_type as handle from user_order_refund_msg uor union all select oi.id,oi.user_read,oi.created_at,oi.user_id,3 as type,f_t_nick_name,product_name,-1 as handle from order_info_msg oi union all select orf.id,orf.user_read,orf.created_at,orf.user_id,4 as type,f_t_nick_name,product_name,is_agree as handle from order_rights_finished_msg orf) as tmp_msg where user_id = ? ORDER BY created_at DESC LIMIT ?,?"
-	results, err := engine.Query(sql, user_id, start, limit)
+	results, err := engine.Query(datastruct.AllMsgSqlForFt, user_id, start, limit)
 	if err != nil {
 		log.Error("DBHandler->GetUserSystemMsg err: %s", err.Error())
 		return nil, datastruct.GetDataFailed
@@ -973,13 +973,66 @@ func (handle *DBHandler) SortProducts(pids []int) datastruct.CodeType {
 	return datastruct.NULLError
 }
 
-// func (handle *DBHandler) GetAllFtOrder(ft_id int) (interface{}, datastruct.CodeType) {
-// 	//user_order_info uoi
-// 	//product_info pro
-// 	//
-// 	SELECT 1 as type,uoi.id,uoi.created_at,uoi.product_id,uoi.user_id,uoc.is_appraised as handle from user_order_info uoi join user_order_check uoc on uoi.id = uoc.id
-// 	//join product_info pro on pro.id = uor.product_id join shop_info si on pro.shop_id = si.id
+func (handle *DBHandler) GetAllFtOrder(ft_id int, pageIndex int, pageSize int) (interface{}, datastruct.CodeType) {
 
-// 	sql := "select * from (SELECT -1 as id,ftr.f_t_read,ftr.created_at,ftr.f_t_id,1 as type,-1 as user_nick_name,-1 as product_name,-1 as handle from f_t_register_msg ftr union all select ftor.id,ftor.f_t_read,ftor.created_at,ftor.f_t_id,2 as type,user_nick_name,product_name,refund_type as handle from f_t_order_refund_msg ftor) as tmp_msg where f_t_id = ? ORDER BY created_at DESC LIMIT ?,?"
-// 	return sql, datastruct.NULLError
-// }
+	engine := handle.mysqlEngine
+	start := (pageIndex - 1) * pageSize
+	limit := pageSize
+
+	results, err := engine.Query(datastruct.AllOrderSqlForFt, ft_id, start, limit)
+	if err != nil {
+		log.Error("DBHandler->GetAllFtOrder err: %s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+	arr := make([]interface{}, 0, len(results))
+	var rs interface{}
+	for _, v := range results {
+		dataType := tools.StringToInt(string(v["type"][:]))
+		createdAt := tools.StringToInt64(string(v["created_at"][:]))
+		orderId := tools.StringToInt64(string(v["orderid"][:]))
+		productName := string(v["product_name"][:])
+		productDesc := string(v["product_desc"][:])
+		avatar := string(v["avatar"][:])
+		nickName := string(v["nick_name"][:])
+		ft_order := new(datastruct.RespOrderForFt)
+		ft_order.Avatar = avatar
+		ft_order.CreatedAt = createdAt
+		ft_order.DataType = dataType
+		ft_order.NickName = nickName
+		ft_order.OrderId = orderId
+		ft_order.ProductDesc = productDesc
+		ft_order.ProductName = productName
+		switch dataType {
+		case 1:
+			//购买成功,评价与未评价的订单
+			ft_p_order := new(datastruct.RespPurchaseOrderForFt)
+			ft_p_order.Order = ft_order
+			ft_p_order.IsAppraised = tools.StringToBool(string(v["handle"][:]))
+			rs = ft_p_order
+		case 2:
+			//退款中
+			ft_rg_order := new(datastruct.RespRefundingOrderForFt)
+			ft_rg_order.Order = ft_order
+			rs = ft_rg_order
+		case 3:
+			//退款结果
+			ft_rf_order := new(datastruct.RespRefundFinishedOrderForFt)
+			ft_rf_order.Order = ft_order
+			ft_rf_order.RefundType = datastruct.UserOrderRefundType(tools.StringToInt(string(v["handle"][:])))
+			rs = ft_rf_order
+		case 4:
+			//维权中
+			ft_rtg_order := new(datastruct.RespRightingOrderForFt)
+			ft_rtg_order.Order = ft_order
+			rs = ft_rtg_order
+		case 5:
+			//维权结果
+			ft_rtf_order := new(datastruct.RespRightFinishedOrderForFt)
+			ft_rtf_order.Order = ft_order
+			ft_rtf_order.IsAgree = tools.StringToBool(string(v["handle"][:]))
+			rs = ft_rtf_order
+		}
+		arr = append(arr, rs)
+	}
+	return arr, datastruct.NULLError
+}

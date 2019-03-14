@@ -84,3 +84,36 @@ type RespProductInfo struct {
 	OnSale       []*TmpProductInfo `json:"onsale"`
 	OffSale      []*TmpProductInfo `json:"offsale"`
 }
+
+type RespOrderForFt struct {
+	DataType    int    `json:"datatype"`
+	OrderId     int64  `json:"orderid"`
+	ProductName string `json:"productname"`
+	ProductDesc string `json:"productdesc"`
+	NickName    string `json:"nickname"`
+	Avatar      string `json:"avatar"`
+	CreatedAt   int64  `json:"time"`
+}
+
+type RespPurchaseOrderForFt struct {
+	Order       *RespOrderForFt `json:"order"`
+	IsAppraised bool            `json:"isappraised"`
+}
+
+type RespRefundingOrderForFt struct {
+	Order *RespOrderForFt `json:"order"`
+}
+
+type RespRefundFinishedOrderForFt struct {
+	Order      *RespOrderForFt     `json:"order"`
+	RefundType UserOrderRefundType `json:"refundtype"`
+}
+
+type RespRightingOrderForFt struct {
+	Order *RespOrderForFt `json:"order"`
+}
+
+type RespRightFinishedOrderForFt struct {
+	Order   *RespOrderForFt `json:"order"`
+	IsAgree bool            `json:"isagree"`
+}
