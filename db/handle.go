@@ -1092,6 +1092,74 @@ func (handle *DBHandler) CreateFakeAppraised(body *datastruct.FakeAppraisedBody,
 }
 
 func (handle *DBHandler) IsAgreeRefund(body *datastruct.IsAgreeRefundBody) datastruct.CodeType {
+	nowTime := time.Now().Unix()
+	engine := handle.mysqlEngine
+	session := engine.NewSession()
+	defer session.Close()
+	session.Begin()
 
+	rs, err := session.Where("id=?", body.Id).Delete(new(datastruct.UserOrderRefunding))
+	if err != nil || rs <= 0 {
+		str := fmt.Sprintf("DBHandler->IsAgreeRefund delete err:%s", err.Error())
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+	var tmp interface{}
+	if body.IsAgree {
+		rf_order := new(datastruct.UserOrderRefundFinished)
+		rf_order.CreatedAt = nowTime
+		rf_order.Id = body.Id
+		rf_order.RefundType = datastruct.Apply
+		tmp = rf_order
+	} else {
+		rtg_order := new(datastruct.UserOrderRighting)
+		rtg_order.CreatedAt = nowTime
+		rtg_order.Id = body.Id
+		tmp = rtg_order
+	}
+
+	_, err = session.InsertOne(tmp)
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->IsAgreeRefund insert err:%s", err.Error())
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+
+	if body.IsAgree {
+		sql := "select pro.price,uoi.user_id from user_order_info uoi join product_info pro on pro.id = uoi.product_id where uoi.id = ?"
+		results, err := engine.Query(sql, body.Id)
+		if err != nil || len(results) <= 0 {
+			rollbackError("DBHandler->IsAgreeRefund get product price err", session)
+			return datastruct.UpdateDataFailed
+		}
+		price := tools.StringToFloat64(string(results[0]["price"][:]))
+		user_id := tools.StringToInt64(string(results[0]["user_id"][:]))
+		gold_count := int64(price)
+		sql = "update hot_user_info set gold_count = gold_count + ? where user_id = ?"
+		_, err = session.Exec(sql, gold_count, user_id)
+		if err != nil {
+			str := fmt.Sprintf("DBHandler->IsAgreeRefund update user account err:%s", err.Error())
+			rollbackError(str, session)
+			return datastruct.UpdateDataFailed
+		}
+		g_change := new(datastruct.UserGoldChange)
+		g_change.ChangeType = datastruct.Refund
+		g_change.CreatedAt = nowTime
+		g_change.UserId = user_id
+		g_change.VarGold = gold_count
+		_, err = session.InsertOne(g_change)
+		if err != nil {
+			str := fmt.Sprintf("DBHandler->IsAgreeRefund insert UserGoldChange err:%s", err.Error())
+			rollbackError(str, session)
+			return datastruct.UpdateDataFailed
+		}
+	}
+
+	err = session.Commit()
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->IsAgreeRefund Commit :%s", err.Error())
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
 	return datastruct.NULLError
 }
