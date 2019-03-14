@@ -1163,3 +1163,42 @@ func (handle *DBHandler) IsAgreeRefund(body *datastruct.IsAgreeRefundBody) datas
 	}
 	return datastruct.NULLError
 }
+
+func (handle *DBHandler) GetFinance(ft_id int) (interface{}, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+	shop_id, code := getShopId(engine, ft_id)
+	if code != datastruct.NULLError {
+		return nil, code
+	}
+	sql := "select * from (select sum(pro.price) as amount from user_order_info uoi join product_info pro on pro.id=uoi.product_id join user_order_check uoc on uoc.id = uoi.id where pro.shop_id = ? and uoc.is_checked = 0 union all select sum(pro.price) as amount from user_order_info uoi join product_info pro on pro.id=uoi.product_id join user_order_check uoc on uoc.id = uoi.id where pro.shop_id = ? and uoc.is_checked = 1) as tmp_sum"
+
+	results, err := engine.Query(sql, shop_id)
+
+	if err != nil {
+		log.Error("DBHandler->getFinance err: %s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+
+	arr := make([]interface{}, 0, len(results))
+	for _, v := range results {
+		str_sum := string(v["amount"][:])
+		amount := tools.StringToFloat64(str_sum)
+		arr = append(arr, amount)
+	}
+	return arr, datastruct.NULLError
+}
+
+// type UserOrderInfo struct {
+// 	Id           int64    `xorm:"not null pk autoincr bigint COMMENT('自增编号')"`
+// 	UserId       int64    `xorm:"bigint not null COMMENT('用户Id')"`
+// 	ProductId    int      `xorm:"not null INT(11) COMMENT('产品Id')"`
+// 	IsPayForGold bool     `xorm:"TINYINT(1) not null COMMENT('是否用金币购买')"`
+// 	Platform     Platform `xorm:"TINYINT(1) not null COMMENT('软件平台,如app,h5,pc')"`
+// }
+
+// type UserOrderCheck struct {
+// 	Id          int64 `xorm:"not null pk bigint COMMENT('订单Id')"`
+// 	IsAppraised bool  `xorm:"TINYINT(1) not null COMMENT('是否已评价')"`
+// 	IsChecked   bool  `xorm:"TINYINT(1) not null COMMENT('是否已结算')"`
+// 	UpdatedAt   int64 `xorm:"bigint not null COMMENT('更新时间')"`
+// }
