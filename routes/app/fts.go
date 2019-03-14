@@ -414,12 +414,12 @@ func sortProducts(r *gin.Engine, handle *handle.AppHandler) {
 func createFakeAppraised(r *gin.Engine, handle *handle.AppHandler) {
 	url := "/app/ft/fakeappraised"
 	r.POST(url, func(c *gin.Context) {
-		_, _, tf := checkFtToken(c, handle)
+		id, _, tf := checkFtToken(c, handle)
 		if !tf {
 			return
 		}
 		c.JSON(200, gin.H{
-			"code": handle.CreateFakeAppraised(c),
+			"code": handle.CreateFakeAppraised(c, id),
 		})
 	})
 }
