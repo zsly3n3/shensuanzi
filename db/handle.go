@@ -1172,7 +1172,7 @@ func (handle *DBHandler) GetFinance(ft_id int) (interface{}, datastruct.CodeType
 	}
 	sql := "select * from (select sum(pro.price) as amount from user_order_info uoi join product_info pro on pro.id=uoi.product_id join user_order_check uoc on uoc.id = uoi.id where pro.shop_id = ? and uoc.is_checked = 0 union all select sum(pro.price) as amount from user_order_info uoi join product_info pro on pro.id=uoi.product_id join user_order_check uoc on uoc.id = uoi.id where pro.shop_id = ? and uoc.is_checked = 1) as tmp_sum"
 
-	results, err := engine.Query(sql, shop_id)
+	results, err := engine.Query(sql, shop_id, shop_id)
 
 	if err != nil {
 		log.Error("DBHandler->getFinance err: %s", err.Error())
