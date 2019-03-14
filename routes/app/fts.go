@@ -445,6 +445,19 @@ func getAllFtOrder(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func isAgreeRefund(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/isagreerefund"
+	r.POST(url, func(c *gin.Context) {
+		_, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		c.JSON(200, gin.H{
+			"code": handle.IsAgreeRefund(c),
+		})
+	})
+}
+
 // func ftIsOnline(r *gin.Engine, handle *handle.AppHandler) {
 // 	url := "/app/ft/online"
 // 	r.POST(url, func(c *gin.Context) {
@@ -513,5 +526,6 @@ func FtRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	sortProducts(r, handle)
 	getAllFtOrder(r, handle)
 	createFakeAppraised(r, handle)
+	isAgreeRefund(r, handle)
 	// ftIsOnline(r, handle)
 }

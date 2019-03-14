@@ -230,6 +230,15 @@ func (app *AppHandler) CreateFakeAppraised(c *gin.Context, ft_id int) datastruct
 	return app.dbHandler.CreateFakeAppraised(&body, ft_id)
 }
 
+func (app *AppHandler) IsAgreeRefund(c *gin.Context) datastruct.CodeType {
+	var body datastruct.IsAgreeRefundBody
+	err := c.BindJSON(&body)
+	if err != nil || body.Id <= 0 {
+		return datastruct.ParamError
+	}
+	return app.dbHandler.IsAgreeRefund(&body)
+}
+
 func (app *AppHandler) GetFtUnReadMsgCount(ft_id int) (interface{}, datastruct.CodeType) {
 	return app.dbHandler.GetFtUnReadMsgCount(ft_id)
 }

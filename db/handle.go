@@ -1090,3 +1090,8 @@ func (handle *DBHandler) CreateFakeAppraised(body *datastruct.FakeAppraisedBody,
 
 	return datastruct.NULLError
 }
+
+func (handle *DBHandler) IsAgreeRefund(body *datastruct.IsAgreeRefundBody) datastruct.CodeType {
+
+	return datastruct.NULLError
+}

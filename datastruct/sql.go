@@ -212,7 +212,6 @@ type UserOrderInfo struct {
 	ProductId    int      `xorm:"not null INT(11) COMMENT('产品Id')"`
 	IsPayForGold bool     `xorm:"TINYINT(1) not null COMMENT('是否用金币购买')"`
 	Platform     Platform `xorm:"TINYINT(1) not null COMMENT('软件平台,如app,h5,pc')"`
-	IsFinished   bool     `xorm:"TINYINT(1) not null COMMENT('是否处理完成')"`
 }
 
 /*订单结算*/

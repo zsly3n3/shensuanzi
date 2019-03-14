@@ -69,3 +69,8 @@ type FakeAppraisedBody struct {
 	Mark  string  `json:"mark"`  //标签
 	Desc  string  `json:"desc"`  //评价内容
 }
+
+type IsAgreeRefundBody struct {
+	Id      int64 `json:"id"` //产品ID
+	IsAgree bool  `json:"isagree"`
+}
