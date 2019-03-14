@@ -34,6 +34,7 @@ const (
 	Redirect                                    //重定向
 	Sensitive                                   //敏感词
 	MaxCreateCount                              //最大创建数量
+	AccountLess                                 //余额不足
 )
 
 type Platform int //平台

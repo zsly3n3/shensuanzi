@@ -61,3 +61,11 @@ type EditProductBody struct {
 	Price       float64 `json:"price"`
 	IsHidden    bool    `json:"ishidden"`
 }
+
+type FakeAppraisedBody struct {
+	Id    int     `json:"id"`    //产品ID
+	Time  int64   `json:"time"`  //评价时间戳
+	Score float64 `json:"score"` //评分数
+	Mark  string  `json:"mark"`  //标签
+	Desc  string  `json:"desc"`  //评价内容
+}

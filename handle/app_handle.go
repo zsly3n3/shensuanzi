@@ -221,6 +221,15 @@ func (app *AppHandler) SortProducts(c *gin.Context) datastruct.CodeType {
 	return app.dbHandler.SortProducts(body.Ids)
 }
 
+func (app *AppHandler) CreateFakeAppraised(c *gin.Context, ft_id int) datastruct.CodeType {
+	var body datastruct.FakeAppraisedBody
+	err := c.BindJSON(&body)
+	if err != nil || body.Id <= 0 || len(body.Desc) > 50 || body.Desc == "" || body.Score <= 0 || body.Time <= 0 {
+		return datastruct.ParamError
+	}
+	return app.dbHandler.CreateFakeAppraised(body, ft_id)
+}
+
 func (app *AppHandler) GetFtUnReadMsgCount(ft_id int) (interface{}, datastruct.CodeType) {
 	return app.dbHandler.GetFtUnReadMsgCount(ft_id)
 }

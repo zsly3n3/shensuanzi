@@ -1036,3 +1036,57 @@ func (handle *DBHandler) GetAllFtOrder(ft_id int, pageIndex int, pageSize int) (
 	}
 	return arr, datastruct.NULLError
 }
+
+func (handle *DBHandler) CreateFakeAppraised(body *datastruct.FakeAppraisedBody, ft_id int) datastruct.CodeType {
+	engine := handle.mysqlEngine
+	sql := "select account from hot_f_t_info where f_t_id = ?"
+	results, err := engine.Query(sql, ft_id)
+	if err != nil || len(results) <= 0 {
+		log.Error("DBHandler->CreateFakeAppraised err0")
+		return datastruct.UpdateDataFailed
+	}
+	account := tools.StringToInt64(string(results[0]["account"][:]))
+	var pay int64
+	pay = 2
+	if account < pay {
+		return datastruct.AccountLess
+	}
+
+	session := engine.NewSession()
+	defer session.Close()
+	session.Begin()
+
+	ap_info := new(datastruct.AppraisedInfo)
+	ap_info.AppraisedType = datastruct.Char
+	ap_info.CreatedAt = body.Time
+	ap_info.Desc = body.Desc
+	ap_info.ProductId = body.Id
+	ap_info.IsAnonym = true
+	ap_info.IsFake = true
+	ap_info.Mark = body.Mark
+	ap_info.Score = body.Score
+
+	_, err = session.InsertOne(ap_info)
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->CreateFakeAppraised Insert AppraisedInfo err:%s", err.Error())
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+
+	sql = "update hot_f_t_info set account = account - ? where f_t_id = ?"
+	_, err = session.Exec(sql, pay, ft_id)
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->CreateFakeAppraised update account :%s", err.Error())
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+
+	err = session.Commit()
+	if err != nil {
+		str := fmt.Sprintf("DBHandler->CreateFakeAppraised Commit :%s", err.Error())
+		rollbackError(str, session)
+		return datastruct.UpdateDataFailed
+	}
+
+	return datastruct.NULLError
+}

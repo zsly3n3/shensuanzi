@@ -411,6 +411,19 @@ func sortProducts(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func createFakeAppraised(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/fakeappraised"
+	r.POST(url, func(c *gin.Context) {
+		_, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		c.JSON(200, gin.H{
+			"code": handle.CreateFakeAppraised(c),
+		})
+	})
+}
+
 func getAllFtOrder(r *gin.Engine, handle *handle.AppHandler) {
 	url := "/app/ft/allorder/:pageindex/:pagesize"
 	r.GET(url, func(c *gin.Context) {
@@ -499,5 +512,6 @@ func FtRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	getProduct(r, handle)
 	sortProducts(r, handle)
 	getAllFtOrder(r, handle)
+	createFakeAppraised(r, handle)
 	// ftIsOnline(r, handle)
 }
