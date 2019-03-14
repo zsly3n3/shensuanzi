@@ -229,6 +229,15 @@ func (app *AppHandler) GetFtInfo(ft_id int) (interface{}, datastruct.CodeType) {
 	return app.dbHandler.GetFtInfo(ft_id)
 }
 
+func (app *AppHandler) GetAllFtOrder(c *gin.Context, ft_id int) (interface{}, datastruct.CodeType) {
+	pageIndex := tools.StringToInt(c.Param("pageindex"))
+	pageSize := tools.StringToInt(c.Param("pagesize"))
+	if pageIndex <= 0 || pageSize <= 0 {
+		return nil, datastruct.ParamError
+	}
+	return app.dbHandler.GetAllFtOrder(ft_id, pageIndex, pageSize)
+}
+
 func (app *AppHandler) IsExistFt(token string) (int, bool, bool) {
 	conn := app.cacheHandler.GetConn()
 	defer conn.Close()

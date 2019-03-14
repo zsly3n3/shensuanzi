@@ -411,6 +411,27 @@ func sortProducts(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func getAllFtOrder(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/allorder"
+	r.GET(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.GetAllFtOrder(c, id)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 // func ftIsOnline(r *gin.Engine, handle *handle.AppHandler) {
 // 	url := "/app/ft/online"
 // 	r.POST(url, func(c *gin.Context) {
@@ -477,5 +498,6 @@ func FtRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	removeProduct(r, handle)
 	getProduct(r, handle)
 	sortProducts(r, handle)
+	getAllFtOrder(r, handle)
 	// ftIsOnline(r, handle)
 }
