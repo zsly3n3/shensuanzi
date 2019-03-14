@@ -412,7 +412,7 @@ func sortProducts(r *gin.Engine, handle *handle.AppHandler) {
 }
 
 func getAllFtOrder(r *gin.Engine, handle *handle.AppHandler) {
-	url := "/app/ft/allorder"
+	url := "/app/ft/allorder/:pageindex/:pagesize"
 	r.GET(url, func(c *gin.Context) {
 		id, _, tf := checkFtToken(c, handle)
 		if !tf {
