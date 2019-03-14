@@ -1178,27 +1178,25 @@ func (handle *DBHandler) GetFinance(ft_id int) (interface{}, datastruct.CodeType
 		log.Error("DBHandler->getFinance err: %s", err.Error())
 		return nil, datastruct.GetDataFailed
 	}
+	notCheckAmount := tools.StringToFloat64(string(results[0]["amount"][:])) //未结算订单总金额
+	checkedAmount := tools.StringToFloat64(string(results[1]["amount"][:]))  //已结算订单总金额
+	totalAmount := notCheckAmount + checkedAmount                            //总订单金额
 
-	arr := make([]interface{}, 0, len(results))
-	for _, v := range results {
-		str_sum := string(v["amount"][:])
-		amount := tools.StringToFloat64(str_sum)
-		arr = append(arr, amount)
-	}
-	return arr, datastruct.NULLError
+	sql = "select balance_total,balance,income_per from hot_f_t_info where f_t_id = ?"
+	results, err = engine.Query(sql, ft_id)
+	checkedBalance := tools.StringToFloat64(string(results[0]["balance_total"][:])) //已结算的总收益
+	balance := tools.StringToFloat64(string(results[0]["balance"][:]))              //可提现的金额
+	IncomePer := tools.StringToFloat64(string(results[0]["income_per"][:]))         //收益提成百分比
+
+	notCheckBalance := notCheckAmount * IncomePer / 100.0 //未结算的总收益
+	totalBalance := notCheckBalance + checkedBalance      //总收益
+	rs := new(datastruct.RespFtFinance)
+	rs.Balance = balance
+	rs.CheckedAmount = checkedAmount
+	rs.CheckedBalance = checkedBalance
+	rs.NotCheckAmount = notCheckAmount
+	rs.NotCheckBalance = notCheckBalance
+	rs.TotalAmount = totalAmount
+	rs.TotalBalance = totalBalance
+	return rs, datastruct.NULLError
 }
-
-// type UserOrderInfo struct {
-// 	Id           int64    `xorm:"not null pk autoincr bigint COMMENT('自增编号')"`
-// 	UserId       int64    `xorm:"bigint not null COMMENT('用户Id')"`
-// 	ProductId    int      `xorm:"not null INT(11) COMMENT('产品Id')"`
-// 	IsPayForGold bool     `xorm:"TINYINT(1) not null COMMENT('是否用金币购买')"`
-// 	Platform     Platform `xorm:"TINYINT(1) not null COMMENT('软件平台,如app,h5,pc')"`
-// }
-
-// type UserOrderCheck struct {
-// 	Id          int64 `xorm:"not null pk bigint COMMENT('订单Id')"`
-// 	IsAppraised bool  `xorm:"TINYINT(1) not null COMMENT('是否已评价')"`
-// 	IsChecked   bool  `xorm:"TINYINT(1) not null COMMENT('是否已结算')"`
-// 	UpdatedAt   int64 `xorm:"bigint not null COMMENT('更新时间')"`
-// }

@@ -117,3 +117,13 @@ type RespRightFinishedOrderForFt struct {
 	Order   *RespOrderForFt `json:"order"`
 	IsAgree bool            `json:"isagree"`
 }
+
+type RespFtFinance struct {
+	NotCheckAmount  float64 `json:"notcheckamount"`
+	CheckedAmount   float64 `json:"checkedamount"`
+	TotalAmount     float64 `json:"totalamount"`     //总订单金额
+	CheckedBalance  float64 `json:"checkedbalance"`  //已结算的总收益
+	NotCheckBalance float64 `json:"notcheckbalance"` //未结算的总收益
+	TotalBalance    float64 `json:"totalbalance"`    //总收益
+	Balance         float64 `json:"balance"`         //可提现的金额
+}
