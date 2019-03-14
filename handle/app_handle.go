@@ -227,7 +227,7 @@ func (app *AppHandler) CreateFakeAppraised(c *gin.Context, ft_id int) datastruct
 	if err != nil || body.Id <= 0 || len(body.Desc) > 50 || body.Desc == "" || body.Score <= 0 || body.Time <= 0 {
 		return datastruct.ParamError
 	}
-	return app.dbHandler.CreateFakeAppraised(body, ft_id)
+	return app.dbHandler.CreateFakeAppraised(&body, ft_id)
 }
 
 func (app *AppHandler) GetFtUnReadMsgCount(ft_id int) (interface{}, datastruct.CodeType) {
