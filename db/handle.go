@@ -1264,6 +1264,7 @@ func (handle *DBHandler) GetAmountList(datatype int, pageIndex int, pageSize int
 		totalAmount = notCheckAmount + checkedAmount                             //总订单金额
 		sql = "select tor.checked,cui.nick_name,cui.avatar,pro.product_name,pro.price,tor.createdat from (select 0 as checked,uoi.user_id as uid,uoi.product_id as pid,uoc.updated_at as createdat from user_order_info uoi join user_order_check uoc on uoc.id = uoi.id where uoc.is_checked = 0 union all select 1 as checked,uoi.user_id as uid,uoi.product_id as pid,uoc.updated_at as createdat from user_order_info uoi join user_order_check uoc on uoc.id = uoi.id where uoc.is_checked = 1 ) as tor join product_info pro on pro.id=tor.pid join cold_user_info cui on cui.id=tor.uid where pro.shop_id = ? ORDER BY tor.createdat DESC LIMIT ?,?"
 		results, err = engine.Query(sql, shop_id, start, limit)
+		log.Debug("results-------%v", results)
 	}
 
 	rs := new(datastruct.RespOrderList)
