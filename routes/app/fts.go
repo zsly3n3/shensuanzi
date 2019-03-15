@@ -466,6 +466,27 @@ func getAmountList(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func getIncomeList(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/incomelist/:datatype/:pageindex/:pagesize"
+	r.GET(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.GetIncomeList(c, id)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 func getFinance(r *gin.Engine, handle *handle.AppHandler) {
 	url := "/app/ft/finance"
 	r.GET(url, func(c *gin.Context) {

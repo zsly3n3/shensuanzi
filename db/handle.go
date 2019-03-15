@@ -1290,4 +1290,117 @@ func (handle *DBHandler) GetAmountList(datatype int, pageIndex int, pageSize int
 	return rs, datastruct.NULLError
 }
 
+func (handle *DBHandler) GetIncomeList(datatype int, pageIndex int, pageSize int, ft_id int) (interface{}, datastruct.CodeType) {
+	start := (pageIndex - 1) * pageSize
+	limit := pageSize
+
+	engine := handle.mysqlEngine
+	shop_id, code := getShopId(engine, ft_id)
+	if code != datastruct.NULLError {
+		return nil, code
+	}
+	var sql string
+	var count float64
+	var totalAmount float64
+	var err error
+	var results []map[string][]byte
+	switch datatype {
+	case 0:
+		var income_per float64
+		totalAmount, count, code, income_per = computeAmount(datatype, shop_id, ft_id, engine)
+		if code != datastruct.NULLError {
+			return nil, code
+		}
+		sql = "select uoc.is_checked as checked,cui.nick_name,cui.avatar,pro.product_name,pro.price * %f as price,uoc.updated_at as createdat from user_order_info uoi join user_order_check uoc on uoc.id = uoi.id join product_info pro on pro.id=uoi.product_id join cold_user_info cui on cui.id=uoi.user_id where uoc.is_checked = 1 and pro.shop_id = ? ORDER BY uoc.updated_at DESC LIMIT ?,?"
+		sql = fmt.Sprintf(sql, income_per/100.0)
+		results, err = engine.Query(sql, shop_id, start, limit)
+	case 1:
+		totalAmount, count, code, _ = computeAmount(datatype, shop_id, ft_id, engine)
+		if code != datastruct.NULLError {
+			return nil, code
+		}
+		sql = "select uoc.is_checked as checked,cui.nick_name,cui.avatar,pro.product_name,uoc.checked_income as price,uoc.updated_at as createdat from user_order_info uoi join user_order_check uoc on uoc.id = uoi.id join product_info pro on pro.id=uoi.product_id join cold_user_info cui on cui.id=uoi.user_id where uoc.is_checked = 1 and pro.shop_id = ? ORDER BY uoc.updated_at DESC LIMIT ?,?"
+		results, err = engine.Query(sql, shop_id, start, limit)
+	case 2:
+		notCheckedAmount, notCheckedCount, code, income_per := computeAmount(0, shop_id, ft_id, engine)
+		if code != datastruct.NULLError {
+			return nil, code
+		}
+		checkedAmount, checkedCount, code, _ := computeAmount(1, shop_id, ft_id, engine)
+		if code != datastruct.NULLError {
+			return nil, code
+		}
+
+		totalAmount = notCheckedAmount + checkedAmount
+		count = notCheckedCount + checkedCount
+		sql = "select tor.checked,cui.nick_name,cui.avatar,tor.product_name,tor.price,tor.createdat from (select 0 as checked,uoi.user_id as uid,pro.product_name,pro.price * %f as price,uoc.updated_at as createdat,pro.shop_id from user_order_info uoi join user_order_check uoc on uoc.id = uoi.id join product_info pro on pro.id=uoi.product_id where uoc.is_checked = 0 union all select 1 as checked,uoi.user_id as uid,pro.product_name,uoc.checked_income as price,uoc.updated_at as createdat,pro.shop_id from user_order_info uoi join user_order_check uoc on uoc.id = uoi.id join product_info pro on pro.id=uoi.product_id where uoc.is_checked = 1 ) as tor join cold_user_info cui on cui.id=tor.uid where tor.shop_id = ? ORDER BY tor.createdat DESC LIMIT ?,?"
+		sql = fmt.Sprintf(sql, income_per/100.0)
+		results, err = engine.Query(sql, shop_id, start, limit)
+	}
+
+	rs := new(datastruct.RespOrderList)
+	rs.Count = int(count)
+	rs.TotalAmount = totalAmount
+
+	if err != nil {
+		log.Error("DBHandler->GetAmountList get list err: %s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+
+	arr := make([]*datastruct.RespOrderInfo, 0, len(results))
+	for _, v := range results {
+		rs := new(datastruct.RespOrderInfo)
+		rs.Avatar = string(v["avatar"][:])
+		rs.NickName = string(v["nick_name"][:])
+		rs.CreatedAt = tools.StringToInt64(string(v["createdat"][:]))
+		rs.IsChecked = tools.StringToBool(string(v["checked"][:]))
+		rs.Price = tools.StringToFloat64(string(v["price"][:]))
+		rs.ProductName = string(v["product_name"][:])
+		arr = append(arr, rs)
+	}
+	rs.List = arr
+	return rs, datastruct.NULLError
+}
+
+func computeAmount(datatype int, shop_id int, ft_id int, engine *xorm.Engine) (float64, float64, datastruct.CodeType, float64) {
+	var count float64
+	var totalAmount float64
+	var income_per float64
+	if datatype == 0 {
+		sql := "select * from (select sum(pro.price) as amount from user_order_info uoi join product_info pro on pro.id=uoi.product_id join user_order_check uoc on uoc.id = uoi.id where pro.shop_id = ? and uoc.is_checked = 0 union all select count(uoi.id) as amount from user_order_info uoi join product_info pro on pro.id=uoi.product_id join user_order_check uoc on uoc.id = uoi.id where pro.shop_id = ? and uoc.is_checked = 0) as tmp_sum"
+		results, err := engine.Query(sql, shop_id, shop_id)
+		if err != nil {
+			log.Error("DBHandler->computeAmount get amount err: %s", err.Error())
+			return -1, -1, datastruct.GetDataFailed, -1
+		}
+		totalPrice := tools.StringToFloat64(string(results[0]["amount"][:]))
+		count = tools.StringToFloat64(string(results[1]["amount"][:]))
+		sql = "select income_per from hot_f_t_info where f_t_id = ?"
+		results, err = engine.Query(sql, ft_id)
+		if err != nil {
+			log.Error("DBHandler->computeAmount get hot_f_t_info err: %s", err.Error())
+			return -1, -1, datastruct.GetDataFailed, -1
+		}
+		income_per = tools.StringToFloat64(string(results[0]["income_per"][:]))
+		totalAmount = totalPrice * income_per
+	} else {
+		sql := "select balance_total from hot_f_t_info where f_t_id = ?"
+		results, err := engine.Query(sql, ft_id)
+		if err != nil {
+			log.Error("DBHandler->computeAmount get hot_f_t_info err: %s", err.Error())
+			return -1, -1, datastruct.GetDataFailed, -1
+		}
+		totalAmount = tools.StringToFloat64(string(results[0]["balance_total"][:]))
+		sql = "select count(uoi.id) as checkedcount from user_order_info uoi join product_info pro on pro.id=uoi.product_id join user_order_check uoc on uoc.id = uoi.id where pro.shop_id = ? and uoc.is_checked = 1"
+		results, err = engine.Query(sql, shop_id)
+		if err != nil {
+			log.Error("DBHandler->computeAmount get count err: %s", err.Error())
+			return -1, -1, datastruct.GetDataFailed, -1
+		}
+		count = tools.StringToFloat64(string(results[0]["checkedcount"][:]))
+	}
+	return totalAmount, count, datastruct.NULLError, income_per
+
+}
+
 //string(results[0][column_name][:])
