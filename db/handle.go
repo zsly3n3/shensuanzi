@@ -1382,7 +1382,7 @@ func computeAmount(datatype int, shop_id int, ft_id int, engine *xorm.Engine) (f
 			return -1, -1, datastruct.GetDataFailed, -1
 		}
 		income_per = tools.StringToFloat64(string(results[0]["income_per"][:]))
-		totalAmount = totalPrice * income_per
+		totalAmount = totalPrice * income_per / 100.0
 	} else {
 		sql := "select balance_total from hot_f_t_info where f_t_id = ?"
 		results, err := engine.Query(sql, ft_id)
