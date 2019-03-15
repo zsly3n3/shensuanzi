@@ -155,3 +155,12 @@ type RespDrawCashParams struct {
 	PoundagePer   int     `json:"poundageper"`
 	RequireVerify float64 `json:"requireverify"`
 }
+
+type RespFtDrawInfo struct {
+	Origin      float64 `json:"origin"`      //发起的提款数目
+	Charge      float64 `json:"charge"`      //到账金额
+	Poundage    float64 `json:"poundage"`    //手续费
+	State       string  `json:"state"`       //提现状态,0为审核中,1为提现成功,2为提现失败
+	ArrivalType string  `json:"arrivaltype"` //到账平台,0为到账到微信,1为到账到支付宝
+	CreatedAt   int64   `json:"createdAt"`   //创建时间
+}

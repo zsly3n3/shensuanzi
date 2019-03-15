@@ -1293,7 +1293,6 @@ func (handle *DBHandler) GetAmountList(datatype int, pageIndex int, pageSize int
 func (handle *DBHandler) GetIncomeList(datatype int, pageIndex int, pageSize int, ft_id int) (interface{}, datastruct.CodeType) {
 	start := (pageIndex - 1) * pageSize
 	limit := pageSize
-
 	engine := handle.mysqlEngine
 	shop_id, code := getShopId(engine, ft_id)
 	if code != datastruct.NULLError {
@@ -1416,6 +1415,32 @@ func (handle *DBHandler) GetDrawCashParams(params_type datastruct.DrawCashParams
 	resp.PoundagePer = params.PoundagePer
 	resp.RequireVerify = params.RequireVerify
 	return resp, datastruct.NULLError
+}
+
+func (handle *DBHandler) GetFtDrawCashInfo(ft_id int, pageIndex int, pageSize int) (interface{}, datastruct.CodeType) {
+	start := (pageIndex - 1) * pageSize
+	limit := pageSize
+	sql := "select origin,poundage,charge,state,arrival_type,created_at from f_t_draw_cash_info where f_t_id = ? ORDER BY created_at DESC LIMIT ?,?"
+	engine := handle.mysqlEngine
+	results, err := engine.Query(sql, ft_id, start, limit)
+	if err != nil {
+		log.Error("DBHandler->GetFtDrawCashInfo err: %s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+	arr := make([]*datastruct.RespFtDrawInfo, 0, len(results))
+	for _, v := range results {
+		ft_draw := new(datastruct.RespFtDrawInfo)
+		ft_draw.Charge = tools.StringToFloat64(string(v["charge"][:]))
+		ft_draw.CreatedAt = tools.StringToInt64(string(v["created_at"][:]))
+		ft_draw.Origin = tools.StringToFloat64(string(v["origin"][:]))
+		ft_draw.Poundage = tools.StringToFloat64(string(v["poundage"][:]))
+		state := tools.StringToInt(string(v["state"][:]))
+		arrivalType := tools.StringToInt(string(v["arrival_type"][:]))
+		ft_draw.State = tools.DrawCashStateToString(datastruct.DrawCashState(state))
+		ft_draw.ArrivalType = tools.DrawCashArrivalTypeToString(datastruct.DrawCashArrivalType(arrivalType))
+		arr = append(arr, ft_draw)
+	}
+	return arr, datastruct.NULLError
 }
 
 //string(results[0][column_name][:])

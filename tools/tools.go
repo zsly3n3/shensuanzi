@@ -102,6 +102,30 @@ func StringToIdCardState(value string) datastruct.IdCardState {
 	return datastruct.IdCardState(rs)
 }
 
+func DrawCashStateToString(tmp datastruct.DrawCashState) string {
+	str := ""
+	switch tmp {
+	case datastruct.Review:
+		str = "审核中"
+	case datastruct.Succeed:
+		str = "提现成功"
+	case datastruct.Failed:
+		str = "提现失败"
+	}
+	return str
+}
+
+func DrawCashArrivalTypeToString(tmp datastruct.DrawCashArrivalType) string {
+	str := ""
+	switch tmp {
+	case datastruct.ArrivalWX:
+		str = "微信钱包"
+	case datastruct.ArrivalZFB:
+		str = "支付宝"
+	}
+	return str
+}
+
 // func StringToOnlineState(value string) datastruct.FTOnlineState {
 // 	rs := StringToInt(value)
 // 	return datastruct.FTOnlineState(rs)
