@@ -7,6 +7,35 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func checkFtToken(c *gin.Context, handle *handle.AppHandler) (int, string, bool) {
+	tokens, isExist := c.Request.Header["Apptoken"]
+	tf := false
+	var token string
+	var ft_id int
+	var isBlackList bool
+	if isExist {
+		token = tokens[0]
+		if token != "" {
+			ft_id, tf, isBlackList = handle.IsExistFt(token)
+			if tf && isBlackList {
+				// url := eventHandler.GetBlackListRedirect()
+				url := "http://www.baidu.com"
+				c.JSON(200, gin.H{
+					"code": datastruct.Redirect,
+					"data": url,
+				})
+				return -1, "", false
+			}
+		}
+	}
+	if !tf {
+		c.JSON(200, gin.H{
+			"code": datastruct.TokenError,
+		})
+	}
+	return ft_id, token, tf
+}
+
 func isExistFtPhone(r *gin.Engine, handle *handle.AppHandler) {
 	url := "/app/ft/isexistphone/:phone"
 	isExistPhone(r, handle, url, true)
@@ -529,6 +558,27 @@ func getQRcode(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func getFtDrawCashParams(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/drawparams"
+	r.GET(url, func(c *gin.Context) {
+		_, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.GetDrawCashParams(datastruct.FT)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 func getProducts(r *gin.Engine, handle *handle.AppHandler) {
 	url := "/app/ft/products"
 	r.GET(url, func(c *gin.Context) {
@@ -576,35 +626,6 @@ func isAgreeRefund(r *gin.Engine, handle *handle.AppHandler) {
 // 	})
 // }
 
-func checkFtToken(c *gin.Context, handle *handle.AppHandler) (int, string, bool) {
-	tokens, isExist := c.Request.Header["Apptoken"]
-	tf := false
-	var token string
-	var ft_id int
-	var isBlackList bool
-	if isExist {
-		token = tokens[0]
-		if token != "" {
-			ft_id, tf, isBlackList = handle.IsExistFt(token)
-			if tf && isBlackList {
-				// url := eventHandler.GetBlackListRedirect()
-				url := "http://www.baidu.com"
-				c.JSON(200, gin.H{
-					"code": datastruct.Redirect,
-					"data": url,
-				})
-				return -1, "", false
-			}
-		}
-	}
-	if !tf {
-		c.JSON(200, gin.H{
-			"code": datastruct.TokenError,
-		})
-	}
-	return ft_id, token, tf
-}
-
 func FtRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	isExistFtPhone(r, handle)
 	isExistFtNickName(r, handle)
@@ -637,5 +658,6 @@ func FtRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	getAmountList(r, handle)
 	getIncomeList(r, handle)
 	getQRcode(r, handle)
+	getFtDrawCashParams(r, handle)
 	// ftIsOnline(r, handle)
 }

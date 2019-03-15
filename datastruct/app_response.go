@@ -147,3 +147,11 @@ type RespProducts struct {
 	Id          int    `json:"id"`
 	ProductName string `json:"productname"`
 }
+
+type RespDrawCashParams struct {
+	MinCharge     float64 `json:"mincharge"`
+	MinPoundage   float64 `json:"minpoundage"`
+	MaxDrawCount  int     `json:"maxdrawcount"`
+	PoundagePer   int     `json:"poundageper"`
+	RequireVerify float64 `json:"requireverify"`
+}

@@ -1400,7 +1400,22 @@ func computeAmount(datatype int, shop_id int, ft_id int, engine *xorm.Engine) (f
 		count = tools.StringToFloat64(string(results[0]["checkedcount"][:]))
 	}
 	return totalAmount, count, datastruct.NULLError, income_per
+}
 
+func (handle *DBHandler) GetDrawCashParams(params_type datastruct.DrawCashParamsType) (interface{}, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+	params := new(datastruct.DrawCashParams)
+	has, err := engine.Where("params_type=?", params_type).Get(params)
+	if err != nil || !has {
+		return nil, datastruct.GetDataFailed
+	}
+	resp := new(datastruct.RespDrawCashParams)
+	resp.MaxDrawCount = params.MaxDrawCount
+	resp.MinCharge = params.MinCharge
+	resp.MinPoundage = params.MinPoundage
+	resp.PoundagePer = params.PoundagePer
+	resp.RequireVerify = params.RequireVerify
+	return resp, datastruct.NULLError
 }
 
 //string(results[0][column_name][:])

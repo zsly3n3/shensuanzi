@@ -2,6 +2,7 @@ package app
 
 import (
 	"shensuanzi/commondata"
+	"shensuanzi/datastruct"
 	"shensuanzi/handle"
 
 	"github.com/gin-gonic/gin"
@@ -51,7 +52,29 @@ func isExistUserPhone(r *gin.Engine, handle *handle.AppHandler) {
 	isExistPhone(r, handle, url, false)
 }
 
+func getUserDrawCashParams(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/user/drawparams"
+	r.GET(url, func(c *gin.Context) {
+		_, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.GetDrawCashParams(datastruct.User)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 func UserRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	isExistUserPhone(r, handle)
+	getUserDrawCashParams(r, handle)
 	test(r, handle)
 }

@@ -252,6 +252,10 @@ func (app *AppHandler) GetFinance(ft_id int) (interface{}, datastruct.CodeType) 
 	return app.dbHandler.GetFinance(ft_id)
 }
 
+func (app *AppHandler) GetDrawCashParams(dtype datastruct.DrawCashParamsType) (interface{}, datastruct.CodeType) {
+	return app.dbHandler.GetDrawCashParams(dtype)
+}
+
 func (app *AppHandler) GetQRcode(ft_id int) (interface{}, datastruct.CodeType) {
 	return fmt.Sprintf("http://adasd/%d", ft_id), datastruct.NULLError
 }
