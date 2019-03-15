@@ -165,8 +165,13 @@ type RespFtDrawInfo struct {
 	CreatedAt   int64   `json:"createdat"`   //创建时间
 }
 
-type RespFtAccountChangeInfo struct {
+type RespFtAccountChange struct {
 	ChangeCount int64  `json:"changecount"` //变化量
 	ChangeType  string `json:"changetype"`  //变化类型
 	CreatedAt   int64  `json:"createdat"`   //创建时间
+}
+
+type RespFtAccountChangeInfo struct {
+	List    []*RespFtAccountChange `json:"list"`
+	Account int64                  `json:"account"`
 }
