@@ -614,5 +614,6 @@ func FtRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	getFinance(r, handle)
 	getProducts(r, handle)
 	getAmountList(r, handle)
+	getIncomeList(r, handle)
 	// ftIsOnline(r, handle)
 }
