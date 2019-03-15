@@ -508,6 +508,27 @@ func getFinance(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func getQRcode(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/qrcode"
+	r.GET(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.GetQRcode(id)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 func getProducts(r *gin.Engine, handle *handle.AppHandler) {
 	url := "/app/ft/products"
 	r.GET(url, func(c *gin.Context) {
@@ -615,5 +636,6 @@ func FtRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	getProducts(r, handle)
 	getAmountList(r, handle)
 	getIncomeList(r, handle)
+	getQRcode(r, handle)
 	// ftIsOnline(r, handle)
 }

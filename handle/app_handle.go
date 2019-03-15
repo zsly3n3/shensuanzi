@@ -1,6 +1,7 @@
 package handle
 
 import (
+	"fmt"
 	"shensuanzi/commondata"
 	"shensuanzi/datastruct"
 	"shensuanzi/tools"
@@ -249,6 +250,10 @@ func (app *AppHandler) GetFtInfo(ft_id int) (interface{}, datastruct.CodeType) {
 
 func (app *AppHandler) GetFinance(ft_id int) (interface{}, datastruct.CodeType) {
 	return app.dbHandler.GetFinance(ft_id)
+}
+
+func (app *AppHandler) GetQRcode(ft_id int) (interface{}, datastruct.CodeType) {
+	return fmt.Sprintf("http://adasd/%d", ft_id), datastruct.NULLError
 }
 
 func (app *AppHandler) GetProducts(ft_id int) (interface{}, datastruct.CodeType) {
