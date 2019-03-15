@@ -216,10 +216,11 @@ type UserOrderInfo struct {
 
 /*订单结算*/
 type UserOrderCheck struct {
-	Id          int64 `xorm:"not null pk bigint COMMENT('订单Id')"`
-	IsAppraised bool  `xorm:"TINYINT(1) not null COMMENT('是否已评价')"`
-	IsChecked   bool  `xorm:"TINYINT(1) not null COMMENT('是否已结算')"`
-	UpdatedAt   int64 `xorm:"bigint not null COMMENT('更新时间')"`
+	Id            int64   `xorm:"not null pk bigint COMMENT('订单Id')"`
+	IsAppraised   bool    `xorm:"TINYINT(1) not null COMMENT('是否已评价')"`
+	IsChecked     bool    `xorm:"TINYINT(1) not null COMMENT('是否已结算')"`
+	CheckedIncome float64 `xorm:"decimal(16,2) not null COMMENT('结算后所得收益')"`
+	UpdatedAt     int64   `xorm:"bigint not null COMMENT('更新时间')"`
 }
 
 /*退款结果*/

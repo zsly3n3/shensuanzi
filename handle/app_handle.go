@@ -251,6 +251,10 @@ func (app *AppHandler) GetFinance(ft_id int) (interface{}, datastruct.CodeType) 
 	return app.dbHandler.GetFinance(ft_id)
 }
 
+func (app *AppHandler) GetProducts(ft_id int) (interface{}, datastruct.CodeType) {
+	return app.dbHandler.GetProducts(ft_id)
+}
+
 func (app *AppHandler) GetAllFtOrder(c *gin.Context, ft_id int) (interface{}, datastruct.CodeType) {
 	pageIndex := tools.StringToInt(c.Param("pageindex"))
 	pageSize := tools.StringToInt(c.Param("pagesize"))

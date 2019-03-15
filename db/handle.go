@@ -1184,11 +1184,11 @@ func (handle *DBHandler) GetFinance(ft_id int) (interface{}, datastruct.CodeType
 
 	sql = "select balance_total,balance,income_per from hot_f_t_info where f_t_id = ?"
 	results, err = engine.Query(sql, ft_id)
-	checkedBalance := tools.StringToFloat64(string(results[0]["balance_total"][:])) //已结算的总收益
+	checkedBalance := tools.StringToFloat64(string(results[0]["balance_total"][:])) //已结算的收益
 	balance := tools.StringToFloat64(string(results[0]["balance"][:]))              //可提现的金额
 	IncomePer := tools.StringToFloat64(string(results[0]["income_per"][:]))         //收益提成百分比
 
-	notCheckBalance := notCheckAmount * IncomePer / 100.0 //未结算的总收益
+	notCheckBalance := notCheckAmount * IncomePer / 100.0 //未结算的收益
 	totalBalance := notCheckBalance + checkedBalance      //总收益
 	rs := new(datastruct.RespFtFinance)
 	rs.Balance = balance
@@ -1200,3 +1200,27 @@ func (handle *DBHandler) GetFinance(ft_id int) (interface{}, datastruct.CodeType
 	rs.TotalBalance = totalBalance
 	return rs, datastruct.NULLError
 }
+
+func (handle *DBHandler) GetProducts(ft_id int) (interface{}, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+	shop_id, code := getShopId(engine, ft_id)
+	if code != datastruct.NULLError {
+		return nil, code
+	}
+	sql := "select id,product_name from product_info where shop_id = ? order by updated_at desc"
+	results, err := engine.Query(sql, shop_id)
+	if err != nil {
+		log.Error("DBHandler->GetProducts err: %s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+	arr := make([]*datastruct.RespProducts, 0, len(results))
+	for _, v := range results {
+		pro := new(datastruct.RespProducts)
+		pro.Id = tools.StringToInt(string(v["id"][:]))
+		pro.ProductName = string(v["product_name"][:])
+		arr = append(arr, pro)
+	}
+	return arr, datastruct.NULLError
+}
+
+//string(results[0][column_name][:])

@@ -466,6 +466,27 @@ func getFinance(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func getProducts(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/products"
+	r.GET(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.GetProducts(id)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 func isAgreeRefund(r *gin.Engine, handle *handle.AppHandler) {
 	url := "/app/ft/isagreerefund"
 	r.POST(url, func(c *gin.Context) {
@@ -549,5 +570,6 @@ func FtRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	createFakeAppraised(r, handle)
 	isAgreeRefund(r, handle)
 	getFinance(r, handle)
+	getProducts(r, handle)
 	// ftIsOnline(r, handle)
 }

@@ -127,3 +127,18 @@ type RespFtFinance struct {
 	TotalBalance    float64 `json:"totalbalance"`    //总收益
 	Balance         float64 `json:"balance"`         //可提现的金额
 }
+
+type RespOrderIncome struct {
+	NickName    string  `json:"nickname"`
+	Avatar      string  `json:"avatar"`
+	ProductName string  `json:"productname"`
+	Price       float64 `json:"price"`
+	Income      float64 `json:"income"`
+	CreatedAt   int64   `json:"time"`
+	IsChecked   bool    `json:"ischecked"` //是否结算
+}
+
+type RespProducts struct {
+	Id          int    `json:"id"`
+	ProductName string `json:"productname"`
+}
