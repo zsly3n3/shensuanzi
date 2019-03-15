@@ -1223,4 +1223,70 @@ func (handle *DBHandler) GetProducts(ft_id int) (interface{}, datastruct.CodeTyp
 	return arr, datastruct.NULLError
 }
 
+func (handle *DBHandler) GetAmountList(datatype int, pageIndex int, pageSize int, ft_id int) (interface{}, datastruct.CodeType) {
+	start := (pageIndex - 1) * pageSize
+	limit := pageSize
+
+	engine := handle.mysqlEngine
+	shop_id, code := getShopId(engine, ft_id)
+	if code != datastruct.NULLError {
+		return nil, code
+	}
+	var sql string
+	var count int64
+	var totalAmount float64
+	var err error
+	var results []map[string][]byte
+	switch datatype {
+	case 0:
+		fallthrough
+	case 1:
+		sql_count := "select * from (select sum(pro.price) as amount from user_order_info uoi join product_info pro on pro.id=uoi.product_id join user_order_check uoc on uoc.id = uoi.id where pro.shop_id = ? and uoc.is_checked = ? union all select count(uoi.id) as amount from user_order_info uoi join product_info pro on pro.id=uoi.product_id join user_order_check uoc on uoc.id = uoi.id where pro.shop_id = ? and uoc.is_checked = ?) as tmp_sum"
+		results, err = engine.Query(sql_count, shop_id, datatype, shop_id, datatype)
+		if err != nil {
+			log.Error("DBHandler->GetAmountList get amount err: %s", err.Error())
+			return nil, datastruct.GetDataFailed
+		}
+		totalAmount = tools.StringToFloat64(string(results[0]["amount"][:]))
+		count = tools.StringToInt64(string(results[1]["amount"][:]))
+		sql = "select uoc.is_checked as checked,cui.nick_name,cui.avatar,pro.product_name,pro.price,uoc.updated_at as createdat from user_order_info uoi join user_order_check uoc on uoc.id = uoi.id join product_info pro on pro.id=uoi.product_id join cold_user_info cui on cui.id=uoi.user_id where uoc.is_checked = ? and pro.shop_id = ? ORDER BY uoc.updated_at DESC LIMIT ?,?"
+		results, err = engine.Query(sql, datatype, shop_id, start, limit)
+	case 2:
+		sql_count := "select * from (select sum(pro.price) as amount from user_order_info uoi join product_info pro on pro.id=uoi.product_id join user_order_check uoc on uoc.id = uoi.id where pro.shop_id = ? and uoc.is_checked = 0 union all select sum(pro.price) as amount from user_order_info uoi join product_info pro on pro.id=uoi.product_id join user_order_check uoc on uoc.id = uoi.id where pro.shop_id = ? and uoc.is_checked = 1 union all select count(uoi.id) as amount from user_order_info uoi join product_info pro on pro.id=uoi.product_id join user_order_check uoc on uoc.id = uoi.id where pro.shop_id = ?) as tmp_sum"
+		results, err = engine.Query(sql_count, shop_id, shop_id, shop_id)
+		if err != nil {
+			log.Error("DBHandler->GetAmountList get amount err: %s", err.Error())
+			return nil, datastruct.GetDataFailed
+		}
+		notCheckAmount := tools.StringToFloat64(string(results[0]["amount"][:])) //未结算订单总金额
+		checkedAmount := tools.StringToFloat64(string(results[1]["amount"][:]))  //已结算订单总金额
+		count = tools.StringToInt64(string(results[2]["amount"][:]))             //总数量
+		totalAmount = notCheckAmount + checkedAmount                             //总订单金额
+		sql = "select tor.checked,cui.nick_name,cui.avatar,pro.product_name,pro.price,tor.createdat from (select 0 as checked,uoi.user_id as uid,uoi.product_id as pid,uoc.updated_at as createdat from user_order_info uoi join user_order_check uoc on uoc.id = uoi.id where uoc.is_checked = 0 union all select 1 as checked,uoi.user_id as uid,uoi.product_id as pid,uoc.updated_at as createdat from user_order_info uoi join user_order_check uoc on uoc.id = uoi.id where uoc.is_checked = 1 ) as tor join product_info pro on pro.id=tor.pid join cold_user_info cui on cui.id=tor.uid where pro.shop_id = ? ORDER BY tor.createdat DESC LIMIT ?,?"
+		results, err = engine.Query(sql, shop_id, start, limit)
+	}
+
+	rs := new(datastruct.RespOrderList)
+	rs.Count = count
+	rs.TotalAmount = totalAmount
+
+	if err != nil {
+		log.Error("DBHandler->GetAmountList get list err: %s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+
+	arr := make([]*datastruct.RespOrderInfo, 0, len(results))
+	for _, v := range results {
+		rs := new(datastruct.RespOrderInfo)
+		rs.Avatar = string(v["avatar"][:])
+		rs.NickName = string(v["nick_name"][:])
+		rs.CreatedAt = tools.StringToInt64(string(v["createdat"][:]))
+		rs.IsChecked = tools.StringToBool(string(v["checked"][:]))
+		rs.Price = tools.StringToFloat64(string(v["price"][:]))
+		rs.ProductName = string(v["product_name"][:])
+		arr = append(arr, rs)
+	}
+	return rs, datastruct.NULLError
+}
+
 //string(results[0][column_name][:])

@@ -445,6 +445,27 @@ func getAllFtOrder(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func getAmountList(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/amountlist/:datatype/:pageindex/:pagesize"
+	r.GET(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.GetAmountList(c, id)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 func getFinance(r *gin.Engine, handle *handle.AppHandler) {
 	url := "/app/ft/finance"
 	r.GET(url, func(c *gin.Context) {
@@ -571,5 +592,6 @@ func FtRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	isAgreeRefund(r, handle)
 	getFinance(r, handle)
 	getProducts(r, handle)
+	getAmountList(r, handle)
 	// ftIsOnline(r, handle)
 }
