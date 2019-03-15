@@ -516,6 +516,27 @@ func getFtDrawCashInfo(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func getFtAccountChangeInfo(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/accountchange/:pageindex/:pagesize"
+	r.GET(url, func(c *gin.Context) {
+		id, _, tf := checkFtToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.GetFtAccountChangeInfo(c, id)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 func getIncomeList(r *gin.Engine, handle *handle.AppHandler) {
 	url := "/app/ft/incomelist/:datatype/:pageindex/:pagesize"
 	r.GET(url, func(c *gin.Context) {
@@ -681,5 +702,6 @@ func FtRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	getQRcode(r, handle)
 	getFtDrawCashParams(r, handle)
 	getFtDrawCashInfo(r, handle)
+	getFtAccountChangeInfo(r, handle)
 	// ftIsOnline(r, handle)
 }

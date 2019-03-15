@@ -1443,4 +1443,26 @@ func (handle *DBHandler) GetFtDrawCashInfo(ft_id int, pageIndex int, pageSize in
 	return arr, datastruct.NULLError
 }
 
+func (handle *DBHandler) GetFtAccountChangeInfo(ft_id int, pageIndex int, pageSize int) (interface{}, datastruct.CodeType) {
+	start := (pageIndex - 1) * pageSize
+	limit := pageSize
+	sql := "select created_at,var_account,change_type from f_t_account_change where f_t_id = ? ORDER BY created_at DESC LIMIT ?,?"
+	engine := handle.mysqlEngine
+	results, err := engine.Query(sql, ft_id, start, limit)
+	if err != nil {
+		log.Error("DBHandler->GetFtAccountChangeInfo err: %s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+	arr := make([]*datastruct.RespFtAccountChangeInfo, 0, len(results))
+	for _, v := range results {
+		tmp := new(datastruct.RespFtAccountChangeInfo)
+		tmp.ChangeCount = tools.StringToInt64(string(v["var_account"][:]))
+		tmp.CreatedAt = tools.StringToInt64(string(v["created_at"][:]))
+		changeType := tools.StringToInt(string(v["change_type"][:]))
+		tmp.ChangeType = tools.ScoreChangeTypeToString(datastruct.ScoreChangeType(changeType))
+		arr = append(arr, tmp)
+	}
+	return arr, datastruct.NULLError
+}
+
 //string(results[0][column_name][:])

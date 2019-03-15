@@ -126,6 +126,17 @@ func DrawCashArrivalTypeToString(tmp datastruct.DrawCashArrivalType) string {
 	return str
 }
 
+func ScoreChangeTypeToString(tmp datastruct.ScoreChangeType) string {
+	str := ""
+	switch tmp {
+	case datastruct.DepositScore:
+		str = "充值"
+	case datastruct.CostScore:
+		str = "消费"
+	}
+	return str
+}
+
 // func StringToOnlineState(value string) datastruct.FTOnlineState {
 // 	rs := StringToInt(value)
 // 	return datastruct.FTOnlineState(rs)

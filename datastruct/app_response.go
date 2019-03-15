@@ -162,5 +162,11 @@ type RespFtDrawInfo struct {
 	Poundage    float64 `json:"poundage"`    //手续费
 	State       string  `json:"state"`       //提现状态,0为审核中,1为提现成功,2为提现失败
 	ArrivalType string  `json:"arrivaltype"` //到账平台,0为到账到微信,1为到账到支付宝
-	CreatedAt   int64   `json:"createdAt"`   //创建时间
+	CreatedAt   int64   `json:"createdat"`   //创建时间
+}
+
+type RespFtAccountChangeInfo struct {
+	ChangeCount int64  `json:"changecount"` //变化量
+	ChangeType  string `json:"changetype"`  //变化类型
+	CreatedAt   int64  `json:"createdat"`   //创建时间
 }
