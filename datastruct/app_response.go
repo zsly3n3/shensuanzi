@@ -139,7 +139,7 @@ type RespOrderInfo struct {
 
 type RespOrderList struct {
 	TotalAmount float64          `json:"totalamount"` //总订单金额
-	Count       int64            `json:"count"`       //总数量
+	Count       int              `json:"count"`       //总数量
 	List        []*RespOrderInfo `json:"list"`
 }
 

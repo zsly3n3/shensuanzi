@@ -1233,7 +1233,7 @@ func (handle *DBHandler) GetAmountList(datatype int, pageIndex int, pageSize int
 		return nil, code
 	}
 	var sql string
-	var count int64
+	var count float64
 	var totalAmount float64
 	var err error
 	var results []map[string][]byte
@@ -1248,7 +1248,7 @@ func (handle *DBHandler) GetAmountList(datatype int, pageIndex int, pageSize int
 			return nil, datastruct.GetDataFailed
 		}
 		totalAmount = tools.StringToFloat64(string(results[0]["amount"][:]))
-		count = tools.StringToInt64(string(results[1]["amount"][:]))
+		count = tools.StringToFloat64(string(results[1]["amount"][:]))
 		sql = "select uoc.is_checked as checked,cui.nick_name,cui.avatar,pro.product_name,pro.price,uoc.updated_at as createdat from user_order_info uoi join user_order_check uoc on uoc.id = uoi.id join product_info pro on pro.id=uoi.product_id join cold_user_info cui on cui.id=uoi.user_id where uoc.is_checked = ? and pro.shop_id = ? ORDER BY uoc.updated_at DESC LIMIT ?,?"
 		results, err = engine.Query(sql, datatype, shop_id, start, limit)
 	case 2:
@@ -1260,14 +1260,14 @@ func (handle *DBHandler) GetAmountList(datatype int, pageIndex int, pageSize int
 		}
 		notCheckAmount := tools.StringToFloat64(string(results[0]["amount"][:])) //未结算订单总金额
 		checkedAmount := tools.StringToFloat64(string(results[1]["amount"][:]))  //已结算订单总金额
-		count = tools.StringToInt64(string(results[2]["amount"][:]))             //总数量
+		count = tools.StringToFloat64(string(results[2]["amount"][:]))           //总数量
 		totalAmount = notCheckAmount + checkedAmount                             //总订单金额
 		sql = "select tor.checked,cui.nick_name,cui.avatar,pro.product_name,pro.price,tor.createdat from (select 0 as checked,uoi.user_id as uid,uoi.product_id as pid,uoc.updated_at as createdat from user_order_info uoi join user_order_check uoc on uoc.id = uoi.id where uoc.is_checked = 0 union all select 1 as checked,uoi.user_id as uid,uoi.product_id as pid,uoc.updated_at as createdat from user_order_info uoi join user_order_check uoc on uoc.id = uoi.id where uoc.is_checked = 1 ) as tor join product_info pro on pro.id=tor.pid join cold_user_info cui on cui.id=tor.uid where pro.shop_id = ? ORDER BY tor.createdat DESC LIMIT ?,?"
 		results, err = engine.Query(sql, shop_id, start, limit)
 	}
 
 	rs := new(datastruct.RespOrderList)
-	rs.Count = count
+	rs.Count = int(count)
 	rs.TotalAmount = totalAmount
 
 	if err != nil {
