@@ -42,5 +42,5 @@ func verifyFtAccount(r *gin.Engine, handle *handle.WebHandler) {
 func RegisterRoutes(r *gin.Engine, handle *handle.WebHandler) {
 	editServerInfo(r, handle)
 	getServerInfo(r, handle)
-	//verifyFtAccount(r, handle)
+	verifyFtAccount(r, handle)
 }
