@@ -3,6 +3,7 @@ package db
 import (
 	"shensuanzi/datastruct"
 	"shensuanzi/log"
+	"shensuanzi/tools"
 )
 
 func (handle *DBHandler) GetServerInfo() (*datastruct.WebServerInfoBody, datastruct.CodeType) {
@@ -31,6 +32,18 @@ func (handle *DBHandler) EditServerInfo(body *datastruct.WebServerInfoBody) data
 	_, err := engine.Where("id=?", datastruct.DefaultId).Cols("version", "is_maintain", "gzh_appid", "kfpt_appid").Update(serverInfo)
 	if err != nil {
 		log.Error("EditServerInfo err:%s", err.Error())
+		return datastruct.UpdateDataFailed
+	}
+	return datastruct.NULLError
+}
+
+func (handle *DBHandler) VerifyFtAccount(body *datastruct.WebVerifyFtAccountBody) datastruct.CodeType {
+	engine := handle.mysqlEngine
+	rs := tools.BoolToAuthState(body.IsPassed)
+	sql := "update cold_f_t_info set auth_state=? where id=?"
+	_, err := engine.Exec(sql, rs, body.FtId)
+	if err != nil {
+		log.Error("VerifyFtAccount err:%s", err.Error())
 		return datastruct.UpdateDataFailed
 	}
 	return datastruct.NULLError

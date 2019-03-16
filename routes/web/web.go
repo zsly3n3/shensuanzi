@@ -31,7 +31,16 @@ func getServerInfo(r *gin.Engine, handle *handle.WebHandler) {
 	})
 }
 
+func verifyFtAccount(r *gin.Engine, handle *handle.WebHandler) {
+	r.POST("/web/verifyftaccount", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"code": handle.VerifyFtAccount(c),
+		})
+	})
+}
+
 func RegisterRoutes(r *gin.Engine, handle *handle.WebHandler) {
 	editServerInfo(r, handle)
 	getServerInfo(r, handle)
+	verifyFtAccount(r, handle)
 }
