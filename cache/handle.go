@@ -113,6 +113,22 @@ func (handle *CACHEHandler) SetFtToken(conn redis.Conn, data *datastruct.FtRedis
 	}
 }
 
+func (handle *CACHEHandler) SetUserToken(conn redis.Conn, data *datastruct.UserRedisData) {
+	key := data.Token
+
+	args := make([]interface{}, 0, 5)
+	args = append(args, key)
+	args = append(args, datastruct.Reidis_IdField)
+	args = append(args, data.UserId)
+	args = append(args, datastruct.Reidis_AccountStateField)
+	args = append(args, int(data.AccountState))
+
+	_, err := conn.Do("hmset", args...)
+	if err != nil {
+		log.Debug("CACHEHandler SetFtToken err:%s", err.Error())
+	}
+}
+
 // const ftOnlineKey = "ft_online"
 
 // func (handle *CACHEHandler) SetFtOnline(conn redis.Conn, ft_id int) datastruct.CodeType {

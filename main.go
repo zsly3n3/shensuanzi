@@ -6,6 +6,7 @@ import (
 	// "app/tools"
 
 	"net/http"
+	"runtime"
 	"shensuanzi/commondata"
 	"shensuanzi/conf"
 	"shensuanzi/datastruct"
@@ -90,8 +91,15 @@ func main() {
 
 	registerRoutes(r, app_hanle, web_hanle)
 
-	server := &http.Server{Addr: conf.Server.HttpServer, Handler: r}
-	gracehttp.Serve(server)
+	switch runtime.GOOS {
+	case "darwin":
+		fallthrough
+	case "linux":
+		server := &http.Server{Addr: conf.Server.HttpServer, Handler: r}
+		gracehttp.Serve(server)
+	case "windows":
+		r.Run(conf.Server.HttpServer)
+	}
 
 	// r.Run(conf.Server.HttpServer) //listen and serve on 0.0.0.0:8080 asd
 }

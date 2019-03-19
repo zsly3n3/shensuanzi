@@ -241,11 +241,34 @@ func (handle *DBHandler) GetFtDataWithToken(token string) (*datastruct.FtRedisDa
 
 	mp := results[0]
 	redis_data.FtId = tools.StringToInt(string(mp["f_t_id"][:]))
-	redis_data.AccountState = datastruct.AccountState(tools.StringToInt(string(mp["f_t_id"][:])))
+	redis_data.AccountState = datastruct.AccountState(tools.StringToInt(string(mp["account_state"][:])))
 	sql = "update hot_f_t_info set login_time = ? where token = ?"
 	_, err = engine.Exec(sql, time.Now().Unix(), token)
 	if err != nil {
 		log.Error("GetFtDataWithToken err:%s", err.Error())
+		return nil, false
+	}
+
+	return redis_data, true
+}
+
+func (handle *DBHandler) GetUserDataWithToken(token string) (*datastruct.UserRedisData, bool) {
+	engine := handle.mysqlEngine
+	sql := "select user_id,account_state from hot_user_info where token = ?"
+	results, err := engine.Query(sql, token)
+	if err != nil || len(results) <= 0 {
+		return nil, false
+	}
+	redis_data := new(datastruct.UserRedisData)
+	redis_data.Token = token
+
+	mp := results[0]
+	redis_data.UserId = tools.StringToInt64(string(mp["user_id"][:]))
+	redis_data.AccountState = datastruct.AccountState(tools.StringToInt(string(mp["account_state"][:])))
+	sql = "update hot_user_info set login_time = ? where token = ?"
+	_, err = engine.Exec(sql, time.Now().Unix(), token)
+	if err != nil {
+		log.Error("GetUserDataWithToken err:%s", err.Error())
 		return nil, false
 	}
 
@@ -1472,6 +1495,42 @@ func (handle *DBHandler) GetFtAccountChangeInfo(ft_id int, pageIndex int, pageSi
 	resp.Account = tools.StringToInt64(string(results[0]["account"][:]))
 	resp.List = arr
 	return resp, datastruct.NULLError
+}
+
+func (handle *DBHandler) UserRegister(body *datastruct.UserRegisterBody) datastruct.CodeType {
+	return userRegister(handle.mysqlEngine, body, nil)
+}
+
+func userRegister(engine *xorm.Engine, body *datastruct.UserRegisterBody, detail *datastruct.UserRegisterDetailBody) datastruct.CodeType {
+	// cold_user := new(datastruct.ColdUserInfo)
+	// if body != nil {
+	// 	cold_user.Phone = body.Phone
+	// 	cold_user.Pwd = body.Pwd
+	// 	cold_user.Registration = body.Platform
+	// 	cold_user.Sex = datastruct.Male
+	// } else {
+	// 	cold_user.Phone = detail.Phone
+	// 	cold_user.Pwd = detail.Pwd
+	// 	cold_user.Registration = detail.Platform
+	// 	cold_user.NickName = detail.NickName
+	// 	cold_user.Avatar = detail.Avatar
+	// 	cold_user.Sex = detail.Sex
+	// 	cold_user.ActualName = detail.ActualName
+	// 	cold_user.DateBirth = detail.Birthday
+	// 	cold_user.BirthPlace = detail.City
+	// }
+	// session := engine.NewSession()
+	// defer session.Close()
+	// session.Begin()
+
+	// session.InsertOne(cold_user)
+
+	// hot_user:=new(datastruct.HotUserInfo)
+	// hot_user.UserId = cold_user.Id
+	// //hot_user.IMPrivateKey
+	// hot_user.
+
+	return datastruct.NULLError
 }
 
 //string(results[0][column_name][:])

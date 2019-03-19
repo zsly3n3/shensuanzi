@@ -343,18 +343,29 @@ func (app *AppHandler) IsExistUser(token string) (int64, bool, bool) {
 	var isBlackList bool
 	userId, tf, isBlackList = app.cacheHandler.IsExistUserWithConn(conn, token)
 	if !tf {
-		// var user *datastruct.UserInfo
-		// user, tf = handle.dbHandler.GetUserDataWithToken(token)
-		// if tf {
-		// 	userId = user.Id
-		// 	isBlackList = tools.IntToBool(user.IsBlackList)
-		// 	handle.cacheHandler.SetUserAllData(conn, user)
-		// 	handle.cacheHandler.AddExpire(conn, token)
-		// }
+		var user_data *datastruct.UserRedisData
+		user_data, tf = app.dbHandler.GetUserDataWithToken(token)
+		if tf {
+			if user_data.AccountState == datastruct.BlackList {
+				isBlackList = true
+			}
+			userId = user_data.UserId
+			app.cacheHandler.SetUserToken(conn, user_data)
+			app.cacheHandler.AddExpire(conn, token)
+		}
 	} else {
-		//app.cacheHandler.AddExpire(conn, token)
+		app.cacheHandler.AddExpire(conn, token)
 	}
 	return userId, tf, isBlackList
+}
+
+func (app *AppHandler) UserRegister(c *gin.Context) datastruct.CodeType {
+	var body datastruct.UserRegisterBody
+	err := c.BindJSON(&body)
+	if err != nil || body.Phone == "" || body.Pwd == "" {
+		return datastruct.ParamError
+	}
+	return app.dbHandler.UserRegister(&body)
 }
 
 // func (app *AppHandler) FtIsOnline(ft_id int) datastruct.CodeType {

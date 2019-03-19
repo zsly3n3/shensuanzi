@@ -12,6 +12,7 @@ const DefaultId = 1
 const MAX_PRODUCT_COUNT = 50
 const Reidis_IdField = "Id"
 const Reidis_AccountStateField = "AccountState"
+const DefaultUserAvatar = "https://shensuanzi.oss-cn-shenzhen.aliyuncs.com/user_avatar/defaultavatar.png"
 const RedisExpireTime = 300 //Redis过期时间300秒
 
 type CodeType int //错误码
@@ -170,6 +171,12 @@ const (
 
 type FtRedisData struct {
 	FtId         int
+	Token        string
+	AccountState AccountState
+}
+
+type UserRedisData struct {
+	UserId       int64
 	Token        string
 	AccountState AccountState
 }

@@ -1,5 +1,21 @@
 package datastruct
 
+type UserRegisterBody struct {
+	Phone    string   `json:"phone"`
+	Pwd      string   `json:"pwd"`
+	Platform Platform `json:"platform"`
+}
+
+type UserRegisterDetailBody struct {
+	UserRegisterBody
+	NickName   string `json:"nickname"`
+	Avatar     string `json:"avatar"`
+	Sex        Sex    `json:"sex"`
+	ActualName string `json:"actualname"`
+	Birthday   string `json:"birthday"`
+	City       string `json:"city"`
+}
+
 type FTRegisterBody struct {
 	Phone    string   `json:"phone"`
 	Pwd      string   `json:"pwd"`
