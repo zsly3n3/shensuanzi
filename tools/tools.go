@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"shensuanzi/datastruct"
 	"shensuanzi/log"
-	"shensuanzi/thirdparty/tls-sig-api-golang"
+	TLSSigAPI "shensuanzi/thirdparty/tls-sig-api-golang"
 	"strconv"
 	"strings"
 )
@@ -80,6 +80,16 @@ func StringToBool(value string) bool {
 		tf = true
 	}
 	return tf
+}
+
+func BoolToAuthState(tf bool) datastruct.AuthState {
+	var rs datastruct.AuthState
+	if tf == true {
+		rs = datastruct.AuthSucceed
+	} else {
+		rs = datastruct.AuthFailed
+	}
+	return rs
 }
 
 func StringToInt(value string) int {
