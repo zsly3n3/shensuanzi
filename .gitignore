@@ -5,3 +5,4 @@ server_release.json
 server_test.json
 server.json
 important/
+.DS_Store
