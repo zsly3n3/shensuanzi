@@ -1615,7 +1615,7 @@ func (handle *DBHandler) UserLoginWithPwd(body *datastruct.UserLoginWithPwdBody)
 
 func (handle *DBHandler) GetHomeData(platform datastruct.Platform) (interface{}, datastruct.CodeType) {
 	engine := handle.mysqlEngine
-	sql := "select img_url,is_jump_to,jump_to from ad_info where is_hidden = 0 and platform = ? and platform = ? order by sort_id desc"
+	sql := "select img_url,is_jump_to,jump_to from ad_info where is_hidden = 0 and (platform = ? or platform = ?) order by sort_id desc"
 	results, err := engine.Query(sql, platform, datastruct.PC+1)
 	if err != nil {
 		log.Error("GetHomeData query ad err:%s", err.Error())
