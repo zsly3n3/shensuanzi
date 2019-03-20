@@ -1627,6 +1627,7 @@ func (handle *DBHandler) GetHomeData(platform datastruct.Platform) (interface{},
 		ad := new(datastruct.RespAdInfo)
 		ad.ImgUrl = string(v["img_url"][:])
 		isJumpTo := tools.StringToBool(string(v["is_jump_to"][:]))
+		ad.IsJumpTo = isJumpTo
 		if isJumpTo {
 			ad.JumpTo = string(v["jump_to"][:])
 		}
