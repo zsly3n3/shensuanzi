@@ -1497,40 +1497,84 @@ func (handle *DBHandler) GetFtAccountChangeInfo(ft_id int, pageIndex int, pageSi
 	return resp, datastruct.NULLError
 }
 
-func (handle *DBHandler) UserRegister(body *datastruct.UserRegisterBody) datastruct.CodeType {
+func (handle *DBHandler) UserRegister(body *datastruct.UserRegisterBody) (*datastruct.RespUserLogin, datastruct.CodeType) {
 	return userRegister(handle.mysqlEngine, body, nil)
 }
 
-func userRegister(engine *xorm.Engine, body *datastruct.UserRegisterBody, detail *datastruct.UserRegisterDetailBody) datastruct.CodeType {
-	// cold_user := new(datastruct.ColdUserInfo)
-	// if body != nil {
-	// 	cold_user.Phone = body.Phone
-	// 	cold_user.Pwd = body.Pwd
-	// 	cold_user.Registration = body.Platform
-	// 	cold_user.Sex = datastruct.Male
-	// } else {
-	// 	cold_user.Phone = detail.Phone
-	// 	cold_user.Pwd = detail.Pwd
-	// 	cold_user.Registration = detail.Platform
-	// 	cold_user.NickName = detail.NickName
-	// 	cold_user.Avatar = detail.Avatar
-	// 	cold_user.Sex = detail.Sex
-	// 	cold_user.ActualName = detail.ActualName
-	// 	cold_user.DateBirth = detail.Birthday
-	// 	cold_user.BirthPlace = detail.City
-	// }
-	// session := engine.NewSession()
-	// defer session.Close()
-	// session.Begin()
+func (handle *DBHandler) UserRegisterWithDetail(body *datastruct.UserRegisterDetailBody) (*datastruct.RespUserLogin, datastruct.CodeType) {
+	return userRegister(handle.mysqlEngine, nil, body)
+}
 
-	// session.InsertOne(cold_user)
+func userRegister(engine *xorm.Engine, body *datastruct.UserRegisterBody, detail *datastruct.UserRegisterDetailBody) (*datastruct.RespUserLogin, datastruct.CodeType) {
+	nowTime := time.Now().Unix()
+	cold_user := new(datastruct.ColdUserInfo)
+	cold_user.CreatedAt = nowTime
+	if body != nil {
+		cold_user.Phone = body.Phone
+		cold_user.Pwd = body.Pwd
+		cold_user.Registration = body.Platform
+		cold_user.Sex = datastruct.Male
+		cold_user.Avatar = datastruct.DefaultUserAvatar
+	} else {
+		cold_user.Phone = detail.Phone
+		cold_user.Pwd = detail.Pwd
+		cold_user.Registration = detail.Platform
+		cold_user.NickName = detail.NickName
+		cold_user.Avatar = detail.Avatar
+		cold_user.Sex = detail.Sex
+		cold_user.ActualName = detail.ActualName
+		cold_user.DateBirth = detail.Birthday
+		cold_user.BirthPlace = detail.City
+	}
+	session := engine.NewSession()
+	defer session.Close()
+	session.Begin()
 
-	// hot_user:=new(datastruct.HotUserInfo)
-	// hot_user.UserId = cold_user.Id
-	// //hot_user.IMPrivateKey
-	// hot_user.
+	_, err := session.InsertOne(cold_user)
+	if err != nil {
+		log.Error("userRegister err:%s", err.Error())
+		return nil, datastruct.UpdateDataFailed
+	}
+	if body != nil {
+		cold_user.NickName = fmt.Sprintf("用户%d", cold_user.Id)
+		_, err = session.Cols("nick_name").Update(cold_user)
+		if err != nil {
+			log.Error("userRegister update err:%s", err.Error())
+			return nil, datastruct.UpdateDataFailed
+		}
+	}
 
-	return datastruct.NULLError
+	im_id := fmt.Sprintf("user_%d", cold_user.Id)
+	im_privatekey, code := tools.AccountGenForIM(im_id, important.IM_SDK_APPID)
+	if code != datastruct.NULLError {
+		return nil, code
+	}
+
+	token := commondata.UniqueId()
+	hot_user := new(datastruct.HotUserInfo)
+	hot_user.UserId = cold_user.Id
+	hot_user.Token = token
+	hot_user.LoginTime = nowTime
+	hot_user.IMPrivateKey = im_privatekey
+
+	_, err = session.InsertOne(hot_user)
+	if err != nil {
+		log.Error("userRegister err:%s", err.Error())
+		return nil, datastruct.UpdateDataFailed
+	}
+
+	err = session.Commit()
+	if err != nil {
+		str := fmt.Sprintf("userRegister Commit :%s", err.Error())
+		rollbackError(str, session)
+		return nil, datastruct.UpdateDataFailed
+	}
+	resp := new(datastruct.RespUserLogin)
+	resp.AccountState = hot_user.AccountState
+	resp.IMPrivateKey = im_privatekey
+	resp.Id = cold_user.Id
+	resp.Token = hot_user.Token
+	return resp, datastruct.NULLError
 }
 
 //string(results[0][column_name][:])

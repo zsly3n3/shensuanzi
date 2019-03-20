@@ -62,27 +62,43 @@ func getUserDrawCashParams(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
-// func userRegister(r *gin.Engine, handle *handle.AppHandler) {
-// 	url := "/app/ft/register"
-// 	r.POST(url, func(c *gin.Context) {
-// 		c.JSON(200, gin.H{
-// 			"code": handle.userRegister(c),
-// 		})
-// 	})
-// }
+func userRegister(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/register"
+	r.POST(url, func(c *gin.Context) {
+		data, code := handle.UserRegister(c)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
 
-// func userRegisterWithDetail(r *gin.Engine, handle *handle.AppHandler) {
-// 	url := "/app/ft/registerwithdetail"
-// 	r.POST(url, func(c *gin.Context) {
-// 		c.JSON(200, gin.H{
-// 			"code": handle.userRegisterWithDetail(c),
-// 		})
-// 	})
-// }
+func userRegisterWithDetail(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/ft/registerwithdetail"
+	r.POST(url, func(c *gin.Context) {
+		data, code := handle.UserRegisterWithDetail(c)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
 
 func UserRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	isExistUserPhone(r, handle)
 	getUserDrawCashParams(r, handle)
-	// userRegister(r, handle)
-	// userRegisterWithDetail(r, handle)
+	userRegister(r, handle)
+	userRegisterWithDetail(r, handle)
 }

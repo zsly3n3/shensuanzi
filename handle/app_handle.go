@@ -359,13 +359,43 @@ func (app *AppHandler) IsExistUser(token string) (int64, bool, bool) {
 	return userId, tf, isBlackList
 }
 
-func (app *AppHandler) UserRegister(c *gin.Context) datastruct.CodeType {
+func (app *AppHandler) UserRegister(c *gin.Context) (interface{}, datastruct.CodeType) {
 	var body datastruct.UserRegisterBody
 	err := c.BindJSON(&body)
-	if err != nil || body.Phone == "" || body.Pwd == "" {
-		return datastruct.ParamError
+	if err != nil || body.Phone == "" || body.Pwd == "" || int(body.Platform) < 0 {
+		return nil, datastruct.ParamError
 	}
-	return app.dbHandler.UserRegister(&body)
+	rs, code := app.dbHandler.UserRegister(&body)
+	if code != datastruct.NULLError {
+		return nil, code
+	}
+	app.userLogin(rs)
+	return rs, code
+}
+
+func (app *AppHandler) UserRegisterWithDetail(c *gin.Context) (interface{}, datastruct.CodeType) {
+	var body datastruct.UserRegisterDetailBody
+	err := c.BindJSON(&body)
+	if err != nil || body.Phone == "" || body.Pwd == "" || int(body.Platform) < 0 || body.NickName == "" || body.Avatar == "" {
+		return nil, datastruct.ParamError
+	}
+	rs, code := app.dbHandler.UserRegisterWithDetail(&body)
+	if code != datastruct.NULLError {
+		return nil, code
+	}
+	app.userLogin(rs)
+	return rs, code
+}
+
+func (app *AppHandler) userLogin(rs *datastruct.RespUserLogin) {
+	user_redis := new(datastruct.UserRedisData)
+	user_redis.UserId = rs.Id
+	user_redis.Token = rs.Token
+	user_redis.AccountState = rs.AccountState
+	conn := app.cacheHandler.GetConn()
+	defer conn.Close()
+	app.cacheHandler.SetUserToken(conn, user_redis)
+	app.cacheHandler.AddExpire(conn, user_redis.Token)
 }
 
 // func (app *AppHandler) FtIsOnline(ft_id int) datastruct.CodeType {

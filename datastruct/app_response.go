@@ -22,6 +22,13 @@ type RespFtLogin struct {
 	FtInfo       *RespFtInfo `json:"info"`
 }
 
+type RespUserLogin struct {
+	Token        string       `json:"token"`
+	IMPrivateKey string       `json:"imkey"`
+	Id           int64        `json:"id"`
+	AccountState AccountState `json:"accountstate"`
+}
+
 type RespAppraise struct {
 	Name        string  `json:"name"`
 	Avatar      string  `json:"avatar"`
