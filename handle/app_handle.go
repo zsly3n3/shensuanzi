@@ -398,6 +398,20 @@ func (app *AppHandler) userLogin(rs *datastruct.RespUserLogin) {
 	app.cacheHandler.AddExpire(conn, user_redis.Token)
 }
 
+func (app *AppHandler) UserLoginWithPwd(c *gin.Context) (interface{}, datastruct.CodeType) {
+	var body datastruct.UserLoginWithPwdBody
+	err := c.BindJSON(&body)
+	if err != nil || body.Phone == "" || body.Pwd == "" {
+		return nil, datastruct.ParamError
+	}
+	rs, code := app.dbHandler.UserLoginWithPwd(&body)
+	if code != datastruct.NULLError {
+		return nil, code
+	}
+	app.userLogin(rs)
+	return rs, code
+}
+
 // func (app *AppHandler) FtIsOnline(ft_id int) datastruct.CodeType {
 // 	conn := app.cacheHandler.GetConn()
 // 	defer conn.Close()

@@ -1537,7 +1537,7 @@ func userRegister(engine *xorm.Engine, body *datastruct.UserRegisterBody, detail
 	}
 	if body != nil {
 		cold_user.NickName = fmt.Sprintf("用户%d", cold_user.Id)
-		_, err = session.Cols("nick_name").Update(cold_user)
+		_, err = session.Where("id=?", cold_user.Id).Cols("nick_name").Update(cold_user)
 		if err != nil {
 			log.Error("userRegister update err:%s", err.Error())
 			return nil, datastruct.UpdateDataFailed
@@ -1574,6 +1574,42 @@ func userRegister(engine *xorm.Engine, body *datastruct.UserRegisterBody, detail
 	resp.IMPrivateKey = im_privatekey
 	resp.Id = cold_user.Id
 	resp.Token = hot_user.Token
+	return resp, datastruct.NULLError
+}
+
+func (handle *DBHandler) UserLoginWithPwd(body *datastruct.UserLoginWithPwdBody) (*datastruct.RespUserLogin, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+	sql := "select cui.id,hui.account_state from cold_user_info cui join hot_user_info hui on hui.user_id=cui.id where phone=? and pwd=?"
+	results, err := engine.Query(sql, body.Phone, body.Pwd)
+	if err != nil {
+		log.Error("UserLoginWithPwd query err:%s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+	if len(results) <= 0 {
+		return nil, datastruct.LoginFailed
+	}
+	userId := tools.StringToInt64(string(results[0]["id"][:]))
+	accountState := tools.StringToAccountState(string(results[0]["account_state"][:]))
+	im_id := fmt.Sprintf("user_%d", userId)
+	im_privatekey, code := tools.AccountGenForIM(im_id, important.IM_SDK_APPID)
+	if code != datastruct.NULLError {
+		return nil, code
+	}
+
+	hot_user := new(datastruct.HotUserInfo)
+	hot_user.LoginTime = time.Now().Unix()
+	hot_user.IMPrivateKey = im_privatekey
+	hot_user.Token = commondata.UniqueId()
+	_, err = engine.Where("user_id=?", userId).Cols("token", "login_time", "i_m_private_key").Update(hot_user)
+	if err != nil {
+		log.Error("UserLoginWithPwd update err:%s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+	resp := new(datastruct.RespUserLogin)
+	resp.IMPrivateKey = im_privatekey
+	resp.Id = userId
+	resp.Token = hot_user.Token
+	resp.AccountState = accountState
 	return resp, datastruct.NULLError
 }
 

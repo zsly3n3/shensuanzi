@@ -1,5 +1,10 @@
 package datastruct
 
+type UserLoginWithPwdBody struct {
+	Phone string `json:"phone"`
+	Pwd   string `json:"pwd"`
+}
+
 type UserRegisterBody struct {
 	Phone    string   `json:"phone"`
 	Pwd      string   `json:"pwd"`

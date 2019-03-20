@@ -112,6 +112,11 @@ func StringToIdCardState(value string) datastruct.IdCardState {
 	return datastruct.IdCardState(rs)
 }
 
+func StringToAccountState(value string) datastruct.AccountState {
+	rs := StringToInt(value)
+	return datastruct.AccountState(rs)
+}
+
 func DrawCashStateToString(tmp datastruct.DrawCashState) string {
 	str := ""
 	switch tmp {

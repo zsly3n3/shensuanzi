@@ -96,9 +96,27 @@ func userRegisterWithDetail(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func userLoginWithPwd(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/user/loginwithpwd"
+	r.POST(url, func(c *gin.Context) {
+		data, code := handle.UserLoginWithPwd(c)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 func UserRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	isExistUserPhone(r, handle)
 	getUserDrawCashParams(r, handle)
 	userRegister(r, handle)
 	userRegisterWithDetail(r, handle)
+	userLoginWithPwd(r, handle)
 }
