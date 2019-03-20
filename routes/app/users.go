@@ -113,10 +113,32 @@ func userLoginWithPwd(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func getHomeData(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/user/homedata"
+	r.GET(url, func(c *gin.Context) {
+		_, _, tf := checkUserToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.GetHomeData(c)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 func UserRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	isExistUserPhone(r, handle)
 	getUserDrawCashParams(r, handle)
 	userRegister(r, handle)
 	userRegisterWithDetail(r, handle)
 	userLoginWithPwd(r, handle)
+	getHomeData(r, handle)
 }

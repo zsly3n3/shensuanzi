@@ -36,6 +36,7 @@ const (
 	Sensitive                                   //敏感词
 	MaxCreateCount                              //最大创建数量
 	AccountLess                                 //余额不足
+	HeaderParamError                            //header参数不足或参数错误
 )
 
 type Platform int //平台

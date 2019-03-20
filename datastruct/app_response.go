@@ -182,3 +182,28 @@ type RespFtAccountChangeInfo struct {
 	List    []*RespFtAccountChange `json:"list"`
 	Account int64                  `json:"account"`
 }
+
+type RespAdInfo struct {
+	ImgUrl   string `json:"img"`
+	JumpTo   string `json:"jumpto"`
+	IsJumpTo bool   `json:"isjumpto"`
+}
+
+type RespBottomBanner struct {
+	ImgUrl string `json:"img"`
+	Key    string `json:"key"`
+}
+
+type RespFtData struct {
+	Id       int    `json:"id"`
+	NickName string `json:"nickname"`
+	Avatar   string `json:"avatar"`
+}
+
+type RespHomeData struct {
+	AdInfo       []*RespAdInfo       `json:"ad"`
+	FtCount      int                 `json:"ftcount"`
+	SolveCount   int64               `json:"solvecount"`
+	Commend      []*RespFtData       `json:"commend"`
+	BottomBanner []*RespBottomBanner `json:"bottombanner"`
+}

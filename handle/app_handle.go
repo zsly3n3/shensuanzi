@@ -412,6 +412,35 @@ func (app *AppHandler) UserLoginWithPwd(c *gin.Context) (interface{}, datastruct
 	return rs, code
 }
 
+func (app *AppHandler) GetHomeData(c *gin.Context) (interface{}, datastruct.CodeType) {
+	platform, code := getPlatform(c)
+	if code != datastruct.NULLError {
+		return nil, code
+	}
+	return app.dbHandler.GetHomeData(platform)
+}
+
+func getPlatform(c *gin.Context) (datastruct.Platform, datastruct.CodeType) {
+	platforms, tf := c.Request.Header["Platform"]
+	if !tf {
+		return datastruct.H5, datastruct.HeaderParamError
+	}
+	if !checkPlatform(platforms) {
+		return datastruct.H5, datastruct.HeaderParamError
+	}
+	platform := tools.StringToInt(platforms[0])
+	return datastruct.Platform(platform), datastruct.NULLError
+}
+
+func checkPlatform(platforms []string) bool {
+	tf := true
+	tmp := tools.StringToInt(platforms[0])
+	if tmp < int(datastruct.APP) || tmp > int(datastruct.PC) {
+		tf = false
+	}
+	return tf
+}
+
 // func (app *AppHandler) FtIsOnline(ft_id int) datastruct.CodeType {
 // 	conn := app.cacheHandler.GetConn()
 // 	defer conn.Close()

@@ -1613,4 +1613,61 @@ func (handle *DBHandler) UserLoginWithPwd(body *datastruct.UserLoginWithPwdBody)
 	return resp, datastruct.NULLError
 }
 
+func (handle *DBHandler) GetHomeData(platform datastruct.Platform) (interface{}, datastruct.CodeType) {
+	engine := handle.mysqlEngine
+	sql := "select img_url,is_jump_to,jump_to from ad_info where is_hidden = 0 and platform = ? and platform = ? order by sort_id desc"
+	results, err := engine.Query(sql, platform, datastruct.PC+1)
+	if err != nil {
+		log.Error("GetHomeData query ad err:%s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+	resp := new(datastruct.RespHomeData)
+	ad_list := make([]*datastruct.RespAdInfo, 0, len(results))
+	for _, v := range results {
+		ad := new(datastruct.RespAdInfo)
+		ad.ImgUrl = string(v["img_url"][:])
+		isJumpTo := tools.StringToBool(string(v["is_jump_to"][:]))
+		if isJumpTo {
+			ad.JumpTo = string(v["jump_to"][:])
+		}
+		ad_list = append(ad_list, ad)
+	}
+
+	sql = "select cft.id,cft.nick_name,cft.avatar from cold_f_t_info cft join shop_info shi on shi.f_t_id=cft.id where shi.is_recommended = 1"
+	results, err = engine.Query(sql)
+	if err != nil {
+		log.Error("GetHomeData query ft err:%s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+	ft_list := make([]*datastruct.RespFtData, 0, len(results))
+	for _, v := range results {
+		ft_data := new(datastruct.RespFtData)
+		ft_data.Avatar = string(v["avatar"][:])
+		ft_data.NickName = string(v["nick_name"][:])
+		ft_data.Id = tools.StringToInt(string(v["id"][:]))
+		ft_list = append(ft_list, ft_data)
+	}
+
+	sql = "select img_nav.img_url,img_nav.key from img_nav where is_hidden = 0 order by sort_id desc"
+	results, err = engine.Query(sql)
+	if err != nil {
+		log.Error("GetHomeData query bottom err:%s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+	banner_list := make([]*datastruct.RespBottomBanner, 0, len(results))
+	for _, v := range results {
+		banner := new(datastruct.RespBottomBanner)
+		banner.ImgUrl = string(v["img_url"][:])
+		banner.Key = string(v["key"][:])
+		banner_list = append(banner_list, banner)
+	}
+
+	resp.AdInfo = ad_list
+	resp.FtCount = datastruct.TmpFtCount
+	resp.SolveCount = datastruct.TmpSolveCount
+	resp.Commend = ft_list
+	resp.BottomBanner = banner_list
+	return resp, datastruct.NULLError
+}
+
 //string(results[0][column_name][:])
