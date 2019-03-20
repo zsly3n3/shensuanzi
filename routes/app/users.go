@@ -63,7 +63,7 @@ func getUserDrawCashParams(r *gin.Engine, handle *handle.AppHandler) {
 }
 
 func userRegister(r *gin.Engine, handle *handle.AppHandler) {
-	url := "/app/ft/register"
+	url := "/app/user/register"
 	r.POST(url, func(c *gin.Context) {
 		data, code := handle.UserRegister(c)
 		if code == datastruct.NULLError {
@@ -80,7 +80,7 @@ func userRegister(r *gin.Engine, handle *handle.AppHandler) {
 }
 
 func userRegisterWithDetail(r *gin.Engine, handle *handle.AppHandler) {
-	url := "/app/ft/registerwithdetail"
+	url := "/app/user/registerwithdetail"
 	r.POST(url, func(c *gin.Context) {
 		data, code := handle.UserRegisterWithDetail(c)
 		if code == datastruct.NULLError {
