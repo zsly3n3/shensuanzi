@@ -207,3 +207,9 @@ type RespHomeData struct {
 	Commend      []*RespFtData       `json:"commend"`
 	BottomBanner []*RespBottomBanner `json:"bottombanner"`
 }
+
+type RespHomeAppraise struct {
+	NickName string `json:"nickname"`
+	Avatar   string `json:"avatar"`
+	Desc     string `json:"desc"`
+}

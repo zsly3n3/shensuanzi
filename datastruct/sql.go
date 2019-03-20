@@ -82,7 +82,7 @@ type AppraisedInfo struct {
 	Id            int           `xorm:"not null pk autoincr INT(11) COMMENT('自增编号')"`
 	ProductId     int           `xorm:"not null INT(11) COMMENT('产品Id')"`
 	UserId        int64         `xorm:"bigint not null default 0 COMMENT('用户Id')"`
-	Score         float64       `xorm:"decimal(2,2) not null COMMENT('评分')"`
+	Score         float64       `xorm:"decimal(4,2) not null COMMENT('评分')"`
 	Mark          string        `xorm:"VARCHAR(255) null COMMENT('多个标签内容')"`
 	AppraisedType AppraisedType `xorm:"TINYINT(1) not null COMMENT('0为只有文字,1只有图,2图文')"`
 	Desc          string        `xorm:"VARCHAR(255) null COMMENT('评价描述')"`

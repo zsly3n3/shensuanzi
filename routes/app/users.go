@@ -134,6 +134,27 @@ func getHomeData(r *gin.Engine, handle *handle.AppHandler) {
 	})
 }
 
+func getHomeAppraised(r *gin.Engine, handle *handle.AppHandler) {
+	url := "/app/user/homeappraised/:pageindex/:pagesize"
+	r.GET(url, func(c *gin.Context) {
+		_, _, tf := checkUserToken(c, handle)
+		if !tf {
+			return
+		}
+		data, code := handle.GetHomeAppraised(c)
+		if code == datastruct.NULLError {
+			c.JSON(200, gin.H{
+				"code": code,
+				"data": data,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"code": code,
+			})
+		}
+	})
+}
+
 func UserRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	isExistUserPhone(r, handle)
 	getUserDrawCashParams(r, handle)
@@ -141,4 +162,5 @@ func UserRegisterRoutes(r *gin.Engine, handle *handle.AppHandler) {
 	userRegisterWithDetail(r, handle)
 	userLoginWithPwd(r, handle)
 	getHomeData(r, handle)
+	getHomeAppraised(r, handle)
 }

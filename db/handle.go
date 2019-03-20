@@ -1662,13 +1662,33 @@ func (handle *DBHandler) GetHomeData(platform datastruct.Platform) (interface{},
 		banner.Key = string(v["key"][:])
 		banner_list = append(banner_list, banner)
 	}
-
 	resp.AdInfo = ad_list
 	resp.FtCount = datastruct.TmpFtCount
 	resp.SolveCount = datastruct.TmpSolveCount
 	resp.Commend = ft_list
 	resp.BottomBanner = banner_list
 	return resp, datastruct.NULLError
+}
+
+func (handle *DBHandler) GetHomeAppraised(pageIndex int, pageSize int) (interface{}, datastruct.CodeType) {
+	start := (pageIndex - 1) * pageSize
+	limit := pageSize
+	sql := "select ari.desc,cui.nick_name,cui.avatar from appraised_info ari join cold_user_info cui on ari.user_id=cui.id where is_passed = 1 and (appraised_type = ? or appraised_type = ?) order by ari.created_at desc LIMIT ?,?"
+	engine := handle.mysqlEngine
+	results, err := engine.Query(sql, datastruct.Char, datastruct.CharAndImg, start, limit)
+	if err != nil {
+		log.Error("GetHomeAppraised err:%s", err.Error())
+		return nil, datastruct.GetDataFailed
+	}
+	rs := make([]*datastruct.RespHomeAppraise, 0, len(results))
+	for _, v := range results {
+		tmp := new(datastruct.RespHomeAppraise)
+		tmp.Avatar = string(v["avatar"][:])
+		tmp.NickName = string(v["nick_name"][:])
+		tmp.Desc = string(v["desc"][:])
+		rs = append(rs, tmp)
+	}
+	return rs, datastruct.NULLError
 }
 
 //string(results[0][column_name][:])

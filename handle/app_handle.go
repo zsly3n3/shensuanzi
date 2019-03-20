@@ -441,6 +441,15 @@ func checkPlatform(platforms []string) bool {
 	return tf
 }
 
+func (app *AppHandler) GetHomeAppraised(c *gin.Context) (interface{}, datastruct.CodeType) {
+	pageIndex := tools.StringToInt(c.Param("pageindex"))
+	pageSize := tools.StringToInt(c.Param("pagesize"))
+	if pageIndex <= 0 || pageSize <= 0 {
+		return nil, datastruct.ParamError
+	}
+	return app.dbHandler.GetHomeAppraised(pageIndex, pageSize)
+}
+
 // func (app *AppHandler) FtIsOnline(ft_id int) datastruct.CodeType {
 // 	conn := app.cacheHandler.GetConn()
 // 	defer conn.Close()
